@@ -1,0 +1,17 @@
+
+.vscode
+
+defs.sub
+tcc.sub
+images/*
+object/*
+upgrade/*
+lnkfeedback.*
+app.sb0
+
+system.txt
+SIMCom_MultiUpgrade_Tool_v1.05
+SIMCom_MultiUpgrade_Tool_v1.05/*
+compile840W.py
+tpbuild
+tplib
