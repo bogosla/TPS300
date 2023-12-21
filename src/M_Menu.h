@@ -72,19 +72,19 @@ uint8 waitforKey();
 int8 waitforKeyMs(int32 ms);
 
 
-// int8 LCD_Menu_InfoTirage(const InfoTirage *menuItems, uint8 count, int8 select, int *id, const InfoTirage *selectedTirage, uint16 sizeSelected);
+int8 LCD_Menu_InfoTirage(const InfoTirage *menuItems, uint8 count, int8 select, int *id, const InfoTirage *selectedTirage, uint16 sizeSelected);
 
 
-// int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *idName);
+int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *idName);
 
 
-// void postFiches(const char *buffBoules);
-// int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage);
+void postFiches(const char *buffBoules);
+int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage);
 
-// void getFiches(void);
-// void getWinningFiches(void);
+void getFiches(void);
+void getWinningFiches(void);
 
-// int LCD_MenuTirage(const char *title, const Tirage *menuItems, unsigned int count, int select, int *id);
+int LCD_MenuTirage(const char *title, const Tirage *menuItems, unsigned int count, int select, int *id);
 void logout(void);
 #endif
 

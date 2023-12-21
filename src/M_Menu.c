@@ -113,9 +113,7 @@ void LCD_Clear(void) {
 
 void Display_Header(const char *title) {
     TP_SetDisplayArea(1, 1, MAX_SCREEN_WIDTH - 1, 12);
-    // TP_ScrDrawRect(2, 1, 126, 11);
     TP_ScrFillRect(1, 1, 127, 10);
-    
     TP_ScrClsPrint(1);
     TP_ScrGotoxyEx(4, 3);
     TP_ScrAttrSet(1);
@@ -138,7 +136,7 @@ int8 LCD_Menu(const char *title, const char menuItems[][MAX_CHAR_ITEMS], uint8 c
 
     TP_ScrAttrSet(0);
     TP_ScrFontSet(ASCII);
-    TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
     TP_ScrFontGet(&fontSizeFont);
     TP_StopRing();    
 
@@ -345,7 +343,7 @@ int32 make_http_GET(const char* subdomain, const char *hostname, const char *pat
 
     // Send the HTTP request
     TP_NetIOCtl(socket, CMD_IO_SET, 1);
-    TP_NetIOCtl(socket, CMD_TO_SET, 60000);
+    TP_NetIOCtl(socket, CMD_TO_SET, 30000);
     while (total_already_sent < total_size_len_request) {
         _result = TP_NetSend(socket, (const uint8*)http_request + total_already_sent, (uint16)total_size_len_request - total_already_sent, 0);
         TP_DbgSerialPrn("\r\nNETSEND:%d %d\r\n", _result, total_size_len_request);
@@ -358,7 +356,7 @@ int32 make_http_GET(const char* subdomain, const char *hostname, const char *pat
     }
 
     TP_NetIOCtl(socket, CMD_IO_SET, 1);
-    TP_NetIOCtl(socket, CMD_TO_SET, 60000);
+    TP_NetIOCtl(socket, CMD_TO_SET, 30000);
 
     _result = 0;
     size = 1;
@@ -366,13 +364,6 @@ int32 make_http_GET(const char* subdomain, const char *hostname, const char *pat
         if (TP_ReAllocMemory(size + _result, (void**)&response) == FALSE) {
             return -1;
         }
-        // char *new_response = realloc(response, size + _result);
-
-        // if (!new_response)
-        // {
-        //     return -1;
-        // }
-        // response = new_response;
         memcpy(response + size - 1, data, _result);
         size += _result;
         response[size - 1] = '\0';  
@@ -810,1368 +801,1373 @@ int8 waitforKeyMs(int32 ms)
 }
 
 
-// int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, int *s, InfoTirage *tirages, int sizeTirage) {
-//     uint8 fontSizeFont = 0;
-//     uint8 running = TRUE;
-//     int8 istart, i, key = 0, to_ret;
-//     int myi = 0, total = 0;
-//     const uint8 MAX_LINES = 5;
-//     TP_DateTime dateTime;
+int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, int *s, InfoTirage *tirages, int sizeTirage) {
+    uint8 fontSizeFont = 0;
+    uint8 running = TRUE;
+    int8 istart, i, key = 0, to_ret;
+    int myi = 0, total = 0;
+    const uint8 MAX_LINES = 5;
+    TP_DateTime dateTime;
 
-//     TP_ScrCls();
-//     TP_Kbflush();
-//     TP_BanIncomingCall(TRUE);
-//     TP_ScrFontSet(ASCII);
-//     TP_ScrAttrSet(0);
-//     TP_ScrSpaceSet(0, 2);
-//     TP_ScrFontGet(&fontSizeFont);
-//     TP_StopRing();
+    TP_ScrCls();
+    TP_Kbflush();
+    TP_BanIncomingCall(TRUE);
+    TP_ScrFontSet(ASCII);
+    TP_ScrAttrSet(0);
+    TP_ScrSpaceSet(0, 2);
+    TP_ScrFontGet(&fontSizeFont);
+    TP_StopRing();
 
-//     while (running)
-//     {
-//         LCD_Clear();
-//         TP_SetDisplayArea(1, 1, MAX_SCREEN_WIDTH - 1, 12);
-//         TP_ScrDrawRect(2, 1, 126, 11);
-//         TP_ScrGotoxyEx(4, 3);
-//         TP_LcdPrintf("%-5s => %6s", "Boul", "Pri");
-//         TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//         TP_ScrClsDisplayArea();
-//         TP_LcdFreeze();
+    while (running)
+    {
+        LCD_Clear();
+        TP_SetDisplayArea(1, 1, MAX_SCREEN_WIDTH - 1, 12);
+        TP_ScrDrawRect(2, 1, 126, 11);
+        TP_ScrGotoxyEx(4, 3);
+        TP_LcdPrintf("%-5s => %6s", "Boul", "Pri");
+        TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+        TP_ScrClsDisplayArea();
+        TP_LcdFreeze();
         
-//         current_y = 14;
-// 		istart = (select / MAX_LINES) *  MAX_LINES; 
-//         myi = 0;
-//         total = 0;
-//         while(myi < count)
-//         {
-//             total += atoi(menuItems[myi].pri);
-//             myi++;
-//         }
+        current_y = 14;
+		istart = (select / MAX_LINES) *  MAX_LINES; 
+        myi = 0;
+        total = 0;
+        while(myi < count)
+        {
+            total += atoi(menuItems[myi].pri);
+            myi++;
+        }
 
-//         for (i = 0;  i < MAX_LINES; i++)
-//         {
-//             if (istart + i < count)
-//             {
-//                 TP_ScrGotoxyEx(3, current_y);
-//                 if (istart + i == select)
-//                 {
-//                     TP_ScrAttrSet(1);
-//                     TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);
-//                     TP_ScrAttrSet(0);
-//                 }
-//                 else
-//                     TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);	
-//                 current_y += 8;				
-//             }
-//             else
-//                 break;
-//         }
+        for (i = 0;  i < MAX_LINES; i++)
+        {
+            if (istart + i < count)
+            {
+                TP_ScrGotoxyEx(3, current_y);
+                if (istart + i == select)
+                {
+                    TP_ScrAttrSet(1);
+                    TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);
+                    TP_ScrAttrSet(0);
+                }
+                else
+                    TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);	
+                current_y += 8;				
+            }
+            else
+                break;
+        }
         
-//         TP_GetDateTime(&dateTime);
-//         TP_ScrGotoxyEx(2, 63 - 7);
-//         TP_LcdPrintf("H%02d:%02d:%02d, TT:%d HT", dateTime.Time.Hours, dateTime.Time.Minutes, dateTime.Time.Seconds, total);	
+        TP_GetDateTime(&dateTime);
+        TP_ScrGotoxyEx(2, 63 - 7);
+        TP_LcdPrintf("H%02d:%02d:%02d, TT:%d HT", dateTime.Time.Hours, dateTime.Time.Minutes, dateTime.Time.Seconds, total);	
 
-// 		TP_ScrUpdate();
-// LOOP:
-//         key = waitforKeyMs(1000);
-//         TP_DbgSerialPrn("\r\nKEY:%d\r\n", key);
+		TP_ScrUpdate();
+LOOP:
+        key = waitforKeyMs(1000);
+        TP_DbgSerialPrn("\r\nKEY:%d\r\n", key);
         
-//         switch(key)
-//         {
-//             case TIMEOUT_KEY:
-//                 // TP_DbgSerialPrn("\rTimeout happen\r\n");
-//                 break;
-//             case TP_KEY_UP:
-//                 select--;
-//                 if (select < 0) select = count - 1;
-//                 break;
-//             case TP_KEY_DOWN:
-//                 select++;
-//                 if (select >= count) select = 0;
-//                 break;
-//             case TP_KEY_OK:
-//                 *s = select;
-//                 select = 10;
-//                 running = FALSE;
-//                 break;
-//             case TP_KEY_FUNC:
-//                 *s = select;
-// 				select = 11;
-//                 running = FALSE;
-//                 break;
-//             case TP_KEY_CLEAR:
-//                 *s = select;
-//                 select = 12;
-//                 running = FALSE;
-//                 break;
-//             case TP_KEY_CANCEL:
-//                 running = FALSE;
-//                 select = -1;
-//                 break;
-//             default:
-//                 goto LOOP;
-//         }
-//     }
-//     to_ret = select;
+        switch(key)
+        {
+            case TIMEOUT_KEY:
+                // TP_DbgSerialPrn("\rTimeout happen\r\n");
+                break;
+            case TP_KEY_UP:
+                select--;
+                if (select < 0) select = count - 1;
+                break;
+            case TP_KEY_DOWN:
+                select++;
+                if (select >= count) select = 0;
+                break;
+            case TP_KEY_OK:
+                *s = select;
+                select = 10;
+                running = FALSE;
+                break;
+            case TP_KEY_FUNC:
+                *s = select;
+				select = 11;
+                running = FALSE;
+                break;
+            case TP_KEY_CLEAR:
+                *s = select;
+                select = 12;
+                running = FALSE;
+                break;
+            case TP_KEY_CANCEL:
+                running = FALSE;
+                select = -1;
+                break;
+            default:
+                goto LOOP;
+        }
+    }
+    to_ret = select;
 
-//     return to_ret;
-// }
-
-
-// static int deleteInfoTirageByIndex(InfoTirage* list, int index, int size) 
-// {
-// 	int i = 0;
-//     if (index < 0 || index >= size) {
-//         // printf("Invalid index.\n");
-//         return -1;
-//     }
-//     i = (int)index;
-//     TP_FreeMemory((void**)&(list[i].name));
-//     while (i < size - 1) {
-//         list[i] = list[i + 1];
-//         i++;
-//     }
-//     return size - 1;// Decrement the size to reflect the deleted element
-// }
+    return to_ret;
+}
 
 
-// static int hasInfoTirageByName(InfoTirage *array, int size, const char *name)
-// {
-//     int i = 0;
-//     while (i < size)
-//     {
-//         if (strcmp(array[i].name, name) == 0 )
-//             return i;
-//         i++;
-//     }
-//     return -1;
-// }
+static int deleteInfoTirageByIndex(InfoTirage* list, int index, int size) 
+{
+	int i = 0;
+    if (index < 0 || index >= size) {
+        // printf("Invalid index.\n");
+        return -1;
+    }
+    i = (int)index;
+    TP_FreeMemory((void**)&(list[i].name));
+    while (i < size - 1) {
+        list[i] = list[i + 1];
+        i++;
+    }
+    return size - 1;// Decrement the size to reflect the deleted element
+}
 
 
-// int8 LCD_Menu_InfoTirage(const InfoTirage *menuItems, uint8 count, int8 select, int *id, const InfoTirage *selectedTirage, uint16 sizeSelected)
-// {
-//     uint32 charSpace = 0, lineSpace = 0;
-//     uint8 fontSizeFont = 0;
-//     uint8 running = TRUE;
-//     int8 istart, i, key = 0, to_ret;
+static int hasInfoTirageByName(InfoTirage *array, int size, const char *name)
+{
+    int i = 0;
+    while (i < size)
+    {
+        if (strcmp(array[i].name, name) == 0 )
+            return i;
+        i++;
+    }
+    return -1;
+}
 
-//     TP_ScrCls();
-//     TP_Kbflush();
-//     TP_BanIncomingCall(TRUE);
-//     TP_ScrFontSet(ASCII);
-//     TP_ScrAttrSet(0);
-//     TP_ScrSpaceSet(0, 2);
-//     TP_ScrSpaceGet(&charSpace,&lineSpace);
-//     TP_ScrFontGet(&fontSizeFont);
-//     TP_StopRing();
+
+int8 LCD_Menu_InfoTirage(const InfoTirage *menuItems, uint8 count, int8 select, int *id, const InfoTirage *selectedTirage, uint16 sizeSelected)
+{
+    uint32 charSpace = 0, lineSpace = 0;
+    uint8 fontSizeFont = 0;
+    uint8 running = TRUE;
+    int8 istart, i, key = 0, to_ret;
+
+    TP_ScrCls();
+    TP_Kbflush();
+    TP_BanIncomingCall(TRUE);
+    TP_ScrFontSet(ASCII);
+    TP_ScrAttrSet(0);
+    TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceGet(&charSpace,&lineSpace);
+    TP_ScrFontGet(&fontSizeFont);
+    TP_StopRing();
     
-//     if (count < 0) return -1;
+    if (count < 0) return -1;
 
-//     while (running == TRUE)
-//     {
-//         int beenSelect = -1;
-//         LCD_Clear();
-//         Display_Header("Chwazi Tiraj");
-//         TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//         TP_ScrClsDisplayArea();
-//         TP_LcdFreeze();
+    while (running == TRUE)
+    {
+        int beenSelect = -1;
+        LCD_Clear();
+        Display_Header("Chwazi Tiraj");
+        TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+        TP_ScrClsDisplayArea();
+        TP_LcdFreeze();
         
-//         current_y = 14;
-// 		istart = (select / 5) *  5; 
-//         for (i = 0;  i < 5; i++)
-//         {
-//             if (istart + i < count)
-//             {
-//                 beenSelect = hasInfoTirageByName(selectedTirage, sizeSelected, menuItems[istart + i].name);
-//                 if (beenSelect >= 0)
-//                     TP_ScrAttrSet(1);
-//                 else
-//                     TP_ScrAttrSet(0);
+        current_y = 14;
+		istart = (select / 5) *  5; 
+        for (i = 0;  i < 5; i++)
+        {
+            if (istart + i < count)
+            {
+                beenSelect = hasInfoTirageByName(selectedTirage, sizeSelected, menuItems[istart + i].name);
+                if (beenSelect >= 0)
+                    TP_ScrAttrSet(1);
+                else
+                    TP_ScrAttrSet(0);
 
-//                 TP_ScrGotoxyEx(3, current_y);
-//                 if (istart + i == select)
-//                 {
-//                     TP_ScrAttrSet(1);
-//                     TP_LcdPrintf("%d.%s", istart + i + 1, (char*)menuItems[istart + i].name);	
-//                     TP_ScrAttrSet(0);
-// 				    *id = istart + i;
-//                 }
-//                 else
-//                     TP_LcdPrintf("%d.%s", istart + i + 1, (char*)menuItems[istart + i].name);	
-//                 current_y += 8;		
-//             }
-//             else
-//                 break;
-//         }
-// 		TP_ScrUpdate();
-// LOOP:
-//         TP_ScrSetIcon(ICON_UP, CLOSEICON);
-//         TP_ScrSetIcon(ICON_DOWN, CLOSEICON);
+                TP_ScrGotoxyEx(3, current_y);
+                if (istart + i == select)
+                {
+                    TP_ScrAttrSet(1);
+                    TP_LcdPrintf("%d.%s", istart + i + 1, (char*)menuItems[istart + i].name);	
+                    TP_ScrAttrSet(0);
+				    *id = istart + i;
+                }
+                else
+                    TP_LcdPrintf("%d.%s", istart + i + 1, (char*)menuItems[istart + i].name);	
+                current_y += 8;		
+            }
+            else
+                break;
+        }
+		TP_ScrUpdate();
+LOOP:
+        TP_ScrSetIcon(ICON_UP, CLOSEICON);
+        TP_ScrSetIcon(ICON_DOWN, CLOSEICON);
 
-//         if (TP_Kbhit() == 0xFF) {
-//             key = TP_GetKey();
-//             TP_DbgSerialPrn("\r\nKEY:%d\r\n", key);
+        if (TP_Kbhit() == 0xFF) {
+            key = TP_GetKey();
+            TP_DbgSerialPrn("\r\nKEY:%d\r\n", key);
             
-//             switch(key)
-//             {
-//                 case TP_KEY_UP:
-//                     select--;
-//                     if (select < 0) select = count - 1;
-//                     break;
-//                 case TP_KEY_DOWN:
-//                     select++;
-//                     if (select >= count) select = 0;
-//                     break;
-//                 case TP_KEY_OK:
-//                     running = FALSE;
-//                     select = 125;
-//                     break;
-//                 case TP_KEY_FUNC:
-//                     running = FALSE;
-//                     select = 100;
-//                     break;
-//                 case TP_KEY_CANCEL:
-//                     running = FALSE;
-//                     select = -1;
-//                     break;
-//                 default:
-//                     goto LOOP;
-//             } 
-//         } else {
-//             goto LOOP;
-//         }
-//     }
-//     return select;
-// }
+            switch(key)
+            {
+                case TP_KEY_UP:
+                    select--;
+                    if (select < 0) select = count - 1;
+                    break;
+                case TP_KEY_DOWN:
+                    select++;
+                    if (select >= count) select = 0;
+                    break;
+                case TP_KEY_OK:
+                    running = FALSE;
+                    select = 125;
+                    break;
+                case TP_KEY_FUNC:
+                    running = FALSE;
+                    select = 100;
+                    break;
+                case TP_KEY_CANCEL:
+                    running = FALSE;
+                    select = -1;
+                    break;
+                default:
+                    goto LOOP;
+            } 
+        } else {
+            goto LOOP;
+        }
+    }
+    return select;
+}
 
 
-// int LCD_MenuTirage(const char *title, const Tirage *menuItems, unsigned int count, int select, int *id)
-// {	
-// 	uint8 i = 0, key = 0;
-// 	unsigned int istart = 0;
-//     Boolean running = TRUE;
-//     const uint8 SIZE_MAX = 5;
+int LCD_MenuTirage(const char *title, const Tirage *menuItems, unsigned int count, int select, int *id)
+{	
+	uint8 i = 0, key = 0;
+	unsigned int istart = 0;
+    Boolean running = TRUE;
+    const uint8 SIZE_MAX = 5;
 	
-//     TP_ScrCls();
-//     TP_Kbflush();
-//     TP_BanIncomingCall(TRUE);
+    TP_ScrCls();
+    TP_Kbflush();
+    TP_BanIncomingCall(TRUE);
 
-//     TP_ScrAttrSet(0);
-//     TP_ScrFontSet(ASCII);
-//     TP_ScrSpaceSet(0, 2);
+    TP_ScrAttrSet(0);
+    TP_ScrFontSet(ASCII);
+    TP_ScrSpaceSet(0, 2);
 
-// 	if (select < 0)
-// 		select = 0;
-// 	if (count <= 0)
-// 		select = -1;
-// 	else
-// 	{
-// 		running = TRUE;
-// 		while (running == TRUE)
-// 		{
-// 			LCD_Clear();
-// 			Display_Header(title);
-//             TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//             TP_ScrClsDisplayArea();
-//             TP_LcdFreeze();
+	if (select < 0)
+		select = 0;
+	if (count <= 0)
+		select = -1;
+	else
+	{
+		running = TRUE;
+		while (running == TRUE)
+		{
+			LCD_Clear();
+			Display_Header(title);
+            TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+            TP_ScrClsDisplayArea();
+            TP_LcdFreeze();
         
-//             current_y = 14;
-// 			istart = (select / SIZE_MAX) * SIZE_MAX; 
+            current_y = 14;
+			istart = (select / SIZE_MAX) * SIZE_MAX; 
 
-// 			for (i = 0;  i < SIZE_MAX; i++)
-// 			{
-// 				if (istart + i < count)
-// 				{
-//                     TP_ScrGotoxyEx(3, current_y);
-//                     if (istart + i == select)
-//                     {
-//                         TP_ScrAttrSet(1);
-//                         TP_LcdPrintf("%d.%s", istart + i + 1, menuItems[istart + i].id);
-//                         TP_ScrAttrSet(0);
-//                         *id = istart + i;			
-//                     }
-//                     else
-//                         TP_LcdPrintf("%d.%s", istart + i + 1, menuItems[istart + i].id);	
-//                     current_y += 8;
-// 				}
-// 				else
-// 					break;
-// 			}
-// 			TP_ScrUpdate();
-// 	LOOP:
-// 			key = waitforKeyMs(3 * 1000);
-//             TP_DbgSerialPrn("\r\nKEY=%d\r\n", key);
+			for (i = 0;  i < SIZE_MAX; i++)
+			{
+				if (istart + i < count)
+				{
+                    TP_ScrGotoxyEx(3, current_y);
+                    if (istart + i == select)
+                    {
+                        TP_ScrAttrSet(1);
+                        TP_LcdPrintf("%d.%s", istart + i + 1, menuItems[istart + i].id);
+                        TP_ScrAttrSet(0);
+                        *id = istart + i;			
+                    }
+                    else
+                        TP_LcdPrintf("%d.%s", istart + i + 1, menuItems[istart + i].id);	
+                    current_y += 8;
+				}
+				else
+					break;
+			}
+			TP_ScrUpdate();
+	LOOP:
+			key = waitforKeyMs(3 * 1000);
+            TP_DbgSerialPrn("\r\nKEY=%d\r\n", key);
 
-// 			switch(key)
-// 			{
-// 				case TP_KEY_UP:
-// 					select--;
-// 					if (select < 0) select = count - 1;
-// 					break;
-// 				case TP_KEY_DOWN:
-// 					select++;
-// 					if (select >= count) select = 0;
-// 					break;
-//                 case TP_KEY_FUNC:
-// 					running = FALSE;
-//                     break;
-// 				case TP_KEY_CANCEL:
-// 					select = -1;
-// 					running = FALSE;
-// 					break;
-// 				case TP_KEY_OK:
-// 					running = FALSE;
-// 					break;
-// 				default:
-// 					goto LOOP;
-// 			}
-// 		}
-// 	}
-// 	LCD_Clear();
-// 	return select;
-// }
+			switch(key)
+			{
+				case TP_KEY_UP:
+					select--;
+					if (select < 0) select = count - 1;
+					break;
+				case TP_KEY_DOWN:
+					select++;
+					if (select >= count) select = 0;
+					break;
+                case TP_KEY_FUNC:
+					running = FALSE;
+                    break;
+				case TP_KEY_CANCEL:
+					select = -1;
+					running = FALSE;
+					break;
+				case TP_KEY_OK:
+					running = FALSE;
+					break;
+				default:
+					goto LOOP;
+			}
+		}
+	}
+	LCD_Clear();
+	return select;
+}
 
 
-// // OK
-// int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *idName)
-// {
-// 	InfoTirage *menu = NULL;
-// 	char *bufferTirages = NULL;
-// 	cJSON *json = NULL;
-// 	int32 size = 0, toret = 0, selected = 0;
-// 	int32 id = 0, idToDelete = 0;
+// OK
+int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *idName)
+{
+	InfoTirage *menu = NULL;
+	char *bufferTirages = NULL;
+	cJSON *json = NULL;
+	int32 size = 0, toret = 0, selected = 0;
+	int32 id = 0, idToDelete = 0;
 		
-//     read_from_file(INFO_TIRAGE_FILE, &bufferTirages);
-// 	json = cJSON_Parse(bufferTirages);
+    read_from_file(INFO_TIRAGE_FILE, &bufferTirages);
+	json = cJSON_Parse(bufferTirages);
 	
-// 	if (json != NULL)
-// 	{
-// 		if (cJSON_IsArray(json))
-// 		{
-// 			cJSON *element;
-// 			cJSON_ArrayForEach(element, json) 
-// 			{
-// 				cJSON *id = cJSON_GetObjectItemCaseSensitive(element, "id");
-// 				cJSON *name = cJSON_GetObjectItemCaseSensitive(element, "name");
-// 				addItem(&menu, &size, id->valueint, name->valuestring);
-// 			}
-// 			toret = 0;
-// 		}
-// 	} else {
-// 		toret = -1;
-//         handleJSONNULL();
-//     }
+	if (json != NULL)
+	{
+		if (cJSON_IsArray(json))
+		{
+			cJSON *element;
+			cJSON_ArrayForEach(element, json) 
+			{
+				cJSON *id = cJSON_GetObjectItemCaseSensitive(element, "id");
+				cJSON *name = cJSON_GetObjectItemCaseSensitive(element, "name");
+				addItem(&menu, &size, id->valueint, name->valuestring);
+			}
+			toret = 0;
+		}
+	} else {
+		toret = -1;
+        handleJSONNULL();
+    }
 
-// 	if (bufferTirages != NULL) {
-// 		TP_FreeMemory((void**)&bufferTirages);
-// 		bufferTirages = NULL;
-// 	}
+	if (bufferTirages != NULL) {
+		TP_FreeMemory((void**)&bufferTirages);
+		bufferTirages = NULL;
+	}
 
-//     if (json != NULL) {
-// 		cJSON_Delete(json);
-//         json = NULL;
-//     }
+    if (json != NULL) {
+		cJSON_Delete(json);
+        json = NULL;
+    }
 
-// 	if (size == 0)
-// 	{
-// 		handleEmptyList();
-// 	}
-// 	selected = 0;
-// 	while (selected >= 0 && size > 0)
-// 	{
-// 		selected = LCD_Menu_InfoTirage(menu, size, selected, &id, *selectedTirage, *sizeTirage);
+	if (size == 0)
+	{
+		handleEmptyList();
+	}
+	selected = 0;
+	while (selected >= 0 && size > 0)
+	{
+		selected = LCD_Menu_InfoTirage(menu, size, selected, &id, *selectedTirage, *sizeTirage);
 
-// 		if (selected < 0) {
-// 			toret = -1;
-//         }
-// 		else if (selected == 100)
-// 		{
-// 			idToDelete = hasInfoTirageByName(*selectedTirage, *sizeTirage, menu[id].name);
-// 			if (idToDelete >= 0)
-// 			{
-// 				*sizeTirage = deleteInfoTirageByIndex(*selectedTirage, idToDelete, *sizeTirage);
-// 			} else
-// 				addItem(selectedTirage, sizeTirage, menu[id].id, menu[id].name);
-// 			selected = id;
-// 		} else if (selected == 125) {
-// 			toret = 0;
-// 			strcpy(name, menu[id].name);
-// 			*idName = menu[id].id;
-// 			selected = -1;
-// 		}
-// 	}
-//     // Free stuff 
-// 	freeItems(menu, size);
-// 	return toret;
-// }
-
-// // OK
-// void postFiches(const char *buffBoules) {
-//     cJSON *json = NULL;
-//     char name[96], boul[6], pri[7], option[2] = "1", pwent[2];
-// 	int id = 0, tip = 0;
-// 	InfoTirage *tirages = NULL;
-// 	int16 sizeTirage = 0, sselected = 0;
-// 	List *list = NULL;
-//     int selected = 0, selected2 = 0;
-//     Boolean stopped = FALSE, running = FALSE;
-//     uint8 key_ret, sWiNon = 1;
-
-//     Boolean fromRePost = FALSE;
-
-//     const char menu[][MAX_CHAR_ITEMS] = {
-// 		"1. Enprime",
-// 		"2. Boul Pe",
-// 		"3. L3 Oto",
-// 		"4. Reve",
-// 		"5. Maryaj Oto",
-// 		"6. L4 Oto",
-// 		"7. Pwent"
-// 	};
-
-//     Boolean isMA = FALSE;
-//     Boolean isOK = FALSE;
-//     BouleItem newItem = {0, "", "", "", "1"};
-
-// 	memset(name, 0x00, sizeof(name));
-// 	memset(pwent, 0x00, sizeof(pwent));
-// 	memset(boul, 0x00, sizeof(boul));
-// 	memset(pri, 0x00, sizeof(pri));
-
-//     selected = 0;
-
-//     tip = getLottoType(&tirages, &sizeTirage, name, &id);
-//     TP_DbgSerialPrn("\r\nTIP=%d\r\n", tip);
-
-//     list = createList();
-// 	memset(pri, 0x00, sizeof(pri));
+		if (selected < 0) {
+			toret = -1;
+        }
+		else if (selected == 100)
+		{
+			idToDelete = hasInfoTirageByName(*selectedTirage, *sizeTirage, menu[id].name);
+			if (idToDelete >= 0)
+			{
+				*sizeTirage = deleteInfoTirageByIndex(*selectedTirage, idToDelete, *sizeTirage);
+			} else
+				addItem(selectedTirage, sizeTirage, menu[id].id, menu[id].name);
+			selected = id;
+		} else if (selected == 125) {
+			toret = 0;
+			strcpy(name, menu[id].name);
+			*idName = menu[id].id;
+			selected = -1;
+		}
+	}
+    // Free stuff 
+	freeItems(menu, size);
+	return toret;
+}
 
 
-//     if (tip == -1) 
-//         selected = -1;
-//     else 
-//         if (sizeTirage == 0)
-//             addItem(&tirages, &sizeTirage, id, name);
 
-//     if (buffBoules != NULL)
-// 	{
-// 		cJSON *tempJson = cJSON_Parse(buffBoules);
-// 		if (tempJson != NULL)
-// 		{
-// 			if (cJSON_IsArray(tempJson))
-// 			{
-// 				cJSON *element;
-//                 fromRePost = TRUE;
-// 				// Iterate over the array elements
-// 				cJSON_ArrayForEach(element, tempJson) 
-// 				{
-// 					cJSON *lotto = cJSON_GetObjectItemCaseSensitive(element, "lotto");
-// 					cJSON *boule = cJSON_GetObjectItemCaseSensitive(element, "boule");
-// 					cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
-// 					cJSON *option = cJSON_GetObjectItemCaseSensitive(element, "option");
-// 					BouleItem _new = {0,"", "", "", ""};
-// 					sprintf(&_new.pri, "%.2f", montant->valuedouble);
-// 					strcpy(&_new.boul, boule->valuestring);
-// 					strcpy(&_new.lotto, lotto->valuestring);
-// 					strcpy(&_new.option, option->valuestring);
-//                     if (strcmp(lotto->valuestring, "MA") == 0 && (uint32)(montant->valuedouble) == 0)
-//                         "// do nothing";
-//                     else
-//                         addElement(list, _new); // add boule in list boules
-// 				}
-// 			}
-// 		}
+// OK
+void postFiches(const char *buffBoules) {
 
-//         if (tempJson != NULL) {
-//             cJSON_Delete(tempJson);
-//             tempJson = NULL;
-//         }
-// 	}
+    cJSON *json = NULL;
+    char name[96], boul[6], pri[7], option[2] = "1", pwent[2];
+	int id = 0, tip = 0;
+	InfoTirage *tirages = NULL;
+	int16 sizeTirage = 0, sselected = 0;
+	List *list = NULL;
+    int selected = 0, selected2 = 0;
+    Boolean stopped = FALSE, running = FALSE;
+    uint8 key_ret, sWiNon = 1;
 
+    Boolean fromRePost = FALSE;
 
-// 	while (selected >= 0)
-// 	{
-// 		selected = GridTirageMenu(list->items, list->size, selected, &sselected, tirages, sizeTirage);
-//         TP_DbgSerialPrn("\r\nGRID TIRAGE KEY RET=%d\r\n", selected);
-// 		switch(selected) 
-// 		{
-//             case 10:
-//                 isMA = FALSE;
-//                 isOK = TRUE;
-//                 memset(boul, 0x00, sizeof(boul));
+    const char menu[][MAX_CHAR_ITEMS] = {
+		"1. Enprime",
+		"2. Boul Pe",
+		"3. L3 Oto",
+		"4. Reve",
+		"5. Maryaj Oto",
+		"6. L4 Oto",
+		"7. Pwent"
+	};
 
-//                 LCD_Clear();
-//                 Display_Header("Mete Boul");
-//                 TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+    Boolean isMA = FALSE;
+    Boolean isOK = FALSE;
+    BouleItem newItem = {0, "", "", "", "1"};
 
-//                 TP_ScrGotoxyEx(3, 15);
-//                 TP_LcdPrintf("Boul:");
-//                 TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
+	memset(name, 0x00, sizeof(name));
+	memset(pwent, 0x00, sizeof(pwent));
+	memset(boul, 0x00, sizeof(boul));
+	memset(pri, 0x00, sizeof(pri));
 
-//                 TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                 TP_ShowInputNum(0, 0, 0);
-//                 TP_SetInputMode(INPUTMODE_LOWCASE);
-//                 key_ret = TP_GetString((char*)boul, 0x80|0x04|0x10, 2, 5);
-//                 if (key_ret == 0xFF) 
-//                     break;
-//                 TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+    selected = 0;
 
-//                 TP_ScrGotoxyEx(3, 32);
-//                 TP_LcdPrintf("Pri: ");
-//                 TP_SetDisplayArea(27, 32, MAX_SCREEN_WIDTH - 1, 49);
-//                 TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                 TP_ShowInputNum(0, 0, 0);
-//                 TP_SetInputMode(INPUTMODE_MAX);
-//                 key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                 if (key_ret == 0xFF) 
-//                     break;
+    tip = getLottoType(&tirages, &sizeTirage, name, &id);
+    TP_DbgSerialPrn("\r\nTIP=%d\r\n", tip);
 
-//                 sprintf(&newItem.boul, "%s", boul);
-// 				sprintf(&newItem.pri, "%s", pri);
-//                 setOptionBouleItem(&newItem);
-
-// 				if (strlen(newItem.boul) == 4 && isOK == TRUE)
-// 				{
-//                     uint8 kkey = 0, sop = 1;
-//                     TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//                     TP_ScrClsDisplayArea();
-
-//                     TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
-//                     TP_ScrGotoxyEx(3, 15);
-
-//                     TP_LcdPrintf("%s X %s", newItem.boul, newItem.pri);
-
-//                     running = TRUE;
-//                     while (running)
-//                     {
-//                         TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
-//                         TP_ScrClsDisplayArea();
-//                         TP_ScrGotoxyEx(2, 27);
-//                         TP_LcdPrintf("Maryaj? ");
-
-//                         TP_ScrGotoxyEx(43, 27);
-//                         if (sWiNon == 1) {
-//                             TP_ScrAttrSet(1);
-//                             TP_LcdPrintf("WI");
-//                         } else {
-//                             TP_ScrAttrSet(0);
-//                             TP_LcdPrintf("WI");
-//                         }
-//                         TP_ScrAttrSet(0);
+    list = createList();
+	memset(pri, 0x00, sizeof(pri));
 
 
-//                         TP_ScrGotoxyEx(57, 27);
-//                          if (sWiNon == 2) {
-//                             TP_ScrAttrSet(1);
-//                             TP_LcdPrintf("NON");
-//                         } else {
-//                             TP_ScrAttrSet(0);
-//                             TP_LcdPrintf("NON");
-//                         }
-//                         TP_ScrAttrSet(0);
+    if (tip == -1) 
+        selected = -1;
+    else 
+        if (sizeTirage == 0)
+            addItem(&tirages, &sizeTirage, id, name);
 
-//                         kkey = waitforKey();
+    if (buffBoules != NULL)
+	{
+		cJSON *tempJson = cJSON_Parse(buffBoules);
+		if (tempJson != NULL)
+		{
+			if (cJSON_IsArray(tempJson))
+			{
+				cJSON *element;
+                fromRePost = TRUE;
+				// Iterate over the array elements
+				cJSON_ArrayForEach(element, tempJson) 
+				{
+					cJSON *lotto = cJSON_GetObjectItemCaseSensitive(element, "lotto");
+					cJSON *boule = cJSON_GetObjectItemCaseSensitive(element, "boule");
+					cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
+					cJSON *option = cJSON_GetObjectItemCaseSensitive(element, "option");
+					BouleItem _new = {0,"", "", "", ""};
+					sprintf(&_new.pri, "%.2f", montant->valuedouble);
+					strcpy(&_new.boul, boule->valuestring);
+					strcpy(&_new.lotto, lotto->valuestring);
+					strcpy(&_new.option, option->valuestring);
+                    if (strcmp(lotto->valuestring, "MA") == 0 && (uint32)(montant->valuedouble) == 0)
+                        "// do nothing";
+                    else
+                        addElement(list, _new); // add boule in list boules
+				}
+			}
+		}
 
-//                         switch (kkey)
-//                         {
-//                             case TP_KEY_UP:
-//                                 sWiNon = 1;
-//                                 break;
-//                             case TP_KEY_DOWN:
-//                                 sWiNon = 2;
-//                                 break;
-//                             case TP_KEY_OK:
-//                                 if (sWiNon == 1)
-// 								{
-// 									isMA = TRUE;
-// 									sprintf(&newItem.lotto, "%s", "MA");
-// 								}
-// 								else
-// 								{
-// 									isMA = FALSE;
-// 									sprintf(&newItem.lotto, "%s", "L4");
-// 								}
-//                                 isOK = TRUE;
-//                                 running = FALSE;
-//                                 break;
+        if (tempJson != NULL) {
+            cJSON_Delete(tempJson);
+            tempJson = NULL;
+        }
+	}
+
+
+	while (selected >= 0)
+	{
+		selected = GridTirageMenu(list->items, list->size, selected, &sselected, tirages, sizeTirage);
+        TP_DbgSerialPrn("\r\nGRID TIRAGE KEY RET=%d\r\n", selected);
+		switch(selected) 
+		{
+            case 10:
+                isMA = FALSE;
+                isOK = TRUE;
+                memset(boul, 0x00, sizeof(boul));
+
+                LCD_Clear();
+                Display_Header("Mete Boul");
+                TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+
+                TP_ScrGotoxyEx(3, 15);
+                TP_LcdPrintf("Boul:");
+                TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
+
+                TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                TP_ShowInputNum(0, 0, 0);
+                TP_SetInputMode(INPUTMODE_LOWCASE);
+                key_ret = TP_GetString((char*)boul, 0x80|0x04|0x10, 2, 5);
+                if (key_ret == 0xFF) 
+                    break;
+                TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+
+                TP_ScrGotoxyEx(3, 32);
+                TP_LcdPrintf("Pri: ");
+                TP_SetDisplayArea(27, 32, MAX_SCREEN_WIDTH - 1, 49);
+                TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                TP_ShowInputNum(0, 0, 0);
+                TP_SetInputMode(INPUTMODE_MAX);
+                key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                if (key_ret == 0xFF) 
+                    break;
+
+                sprintf(&newItem.boul, "%s", boul);
+				sprintf(&newItem.pri, "%s", pri);
+                setOptionBouleItem(&newItem);
+
+				if (strlen(newItem.boul) == 4 && isOK == TRUE)
+				{
+                    uint8 kkey = 0, sop = 1;
+                    TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+                    TP_ScrClsDisplayArea();
+
+                    TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                    TP_ScrGotoxyEx(3, 15);
+
+                    TP_LcdPrintf("%s X %s", newItem.boul, newItem.pri);
+
+                    running = TRUE;
+                    while (running)
+                    {
+                        TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
+                        TP_ScrClsDisplayArea();
+                        TP_ScrGotoxyEx(2, 27);
+                        TP_LcdPrintf("Maryaj? ");
+
+                        TP_ScrGotoxyEx(43, 27);
+                        if (sWiNon == 1) {
+                            TP_ScrAttrSet(1);
+                            TP_LcdPrintf("WI");
+                        } else {
+                            TP_ScrAttrSet(0);
+                            TP_LcdPrintf("WI");
+                        }
+                        TP_ScrAttrSet(0);
+
+
+                        TP_ScrGotoxyEx(57, 27);
+                         if (sWiNon == 2) {
+                            TP_ScrAttrSet(1);
+                            TP_LcdPrintf("NON");
+                        } else {
+                            TP_ScrAttrSet(0);
+                            TP_LcdPrintf("NON");
+                        }
+                        TP_ScrAttrSet(0);
+
+                        kkey = waitforKey();
+
+                        switch (kkey)
+                        {
+                            case TP_KEY_UP:
+                                sWiNon = 1;
+                                break;
+                            case TP_KEY_DOWN:
+                                sWiNon = 2;
+                                break;
+                            case TP_KEY_OK:
+                                if (sWiNon == 1)
+								{
+									isMA = TRUE;
+									sprintf(&newItem.lotto, "%s", "MA");
+								}
+								else
+								{
+									isMA = FALSE;
+									sprintf(&newItem.lotto, "%s", "L4");
+								}
+                                isOK = TRUE;
+                                running = FALSE;
+                                break;
                             
-//                             case TP_KEY_CANCEL:
-//                                 isOK = FALSE;
-//                                 running = FALSE;
-//                                 break;
-//                             default:
-//                                 break;
-//                         }
-//                     }
-//                 }
+                            case TP_KEY_CANCEL:
+                                isOK = FALSE;
+                                running = FALSE;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
 
-// 				if (strlen(newItem.boul) >= 4 && isOK == TRUE && isMA == FALSE) {
-//                     do
-//                     {
-//                         TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
-//                         TP_ScrClsDisplayArea();                        
+				if (strlen(newItem.boul) >= 4 && isOK == TRUE && isMA == FALSE) {
+                    do
+                    {
+                        TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+                        TP_ScrClsDisplayArea();                        
 
-//                         TP_ScrGotoxyEx(3, 32);
-//                         TP_LcdPrintf("Opsyon? ");
-//                         TP_SetDisplayArea(27, 31, MAX_SCREEN_WIDTH - 1, 49);
-//                         TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                         TP_ShowInputNum(0, 0, 0);
-//                         TP_SetInputMode(INPUTMODE_MAX);
-//                         key_ret = TP_GetString((char*)option, 0x80|0x04|0x10, 1, 1);
-//                         if (key_ret == 0xFF) {
-//                             break;
-//                             isOK = FALSE;
-//                         } else {
-//                             sprintf(&newItem.option, option);
-//                             isOK = TRUE;                
-//                         }
-//                     } while (atoi(option) < 1 && atoi(option) >=3);
-//                 }
+                        TP_ScrGotoxyEx(3, 32);
+                        TP_LcdPrintf("Opsyon? ");
+                        TP_SetDisplayArea(27, 31, MAX_SCREEN_WIDTH - 1, 49);
+                        TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                        TP_ShowInputNum(0, 0, 0);
+                        TP_SetInputMode(INPUTMODE_MAX);
+                        key_ret = TP_GetString((char*)option, 0x80|0x04|0x10, 1, 1);
+                        if (key_ret == 0xFF) {
+                            break;
+                            isOK = FALSE;
+                        } else {
+                            sprintf(&newItem.option, option);
+                            isOK = TRUE;                
+                        }
+                    } while (atoi(option) < 1 && atoi(option) >=3);
+                }
 
-//                 if (isOK == TRUE) {
-// 					addElement(list, newItem);
-// 					selected = list->size - 1;
-//                 }
-//                 break;
-//             case 11:
-//                 selected2 = 0;
-//                 stopped = FALSE;
-//                 while (selected2 >= 0)
-// 				{
-// 					selected2 = LCD_Menu("Lot Opsyon", menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
-// 					switch(selected2) 
-// 					{
-//                         case 0:
-//                         if (make_post_fiches(list, id, tirages, sizeTirage) == 0)
-// 							{
-// 								// canSelectBoulePaire = 1;
-// 								// canSelectBouleTriple = 1;
-// 								destroyList(list);
-// 								list = createList();
-// 								selected2 = -1;
-// 								if (buffBoules != NULL)
-// 								{
-// 									selected2 = -1;
-//                                     // TODO, return outter
-// 									// stop = 0;
-// 								}
+                if (isOK == TRUE) {
+					addElement(list, newItem);
+					selected = list->size - 1;
+                }
+                break;
+            case 11:
+                selected2 = 0;
+                stopped = FALSE;
+                while (selected2 >= 0)
+				{
+					selected2 = LCD_Menu("Lot Opsyon", menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
+					switch(selected2) 
+					{
+                        case 0:
+                        if (make_post_fiches(list, id, tirages, sizeTirage) == 0)
+							{
+								// canSelectBoulePaire = 1;
+								// canSelectBouleTriple = 1;
+								destroyList(list);
+								list = createList();
+								selected2 = -1;
+								if (buffBoules != NULL)
+								{
+									selected2 = -1;
+                                    // TODO, return outter
+									// stop = 0;
+								}
 
-//                                 if (fromRePost) {
-//                                     selected2 = -1;
-//                                     selected = -1; // Stop to goto list tickets
-//                                 }
-// 							}
-//                             break;
-//                         case 1:
-//                             LCD_Clear();
-//                             Display_Header("Mete Pri");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                                if (fromRePost) {
+                                    selected2 = -1;
+                                    selected = -1; // Stop to goto list tickets
+                                }
+							}
+                            break;
+                        case 1:
+                            LCD_Clear();
+                            Display_Header("Mete Pri");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pri: ");
-//                             TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pri: ");
+                            TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-// 							addBoulePaire(list, pri);
-//                             selected2 = -1;
-//                             break;
-//                         case 2:
-//                             LCD_Clear();
-//                             Display_Header("Mete Pri");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
+							addBoulePaire(list, pri);
+                            selected2 = -1;
+                            break;
+                        case 2:
+                            LCD_Clear();
+                            Display_Header("Mete Pri");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pri: ");
-//                             TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pri: ");
+                            TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-// 							addBouleTriple(list, pri);
-//                             selected2 = -1;
-//                             break;
-//                         case 3:
-//                             LCD_Clear();
-//                             Display_Header("Mete Pri");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
+							addBouleTriple(list, pri);
+                            selected2 = -1;
+                            break;
+                        case 3:
+                            LCD_Clear();
+                            Display_Header("Mete Pri");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pri: ");
-//                             TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pri: ");
+                            TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-// 							addBouleRevers(list, pri);
-//                             selected2 = -1;
-//                             break;
-//                         case 4:
-//                             LCD_Clear();
-//                             Display_Header("Mete Pri");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
+							addBouleRevers(list, pri);
+                            selected2 = -1;
+                            break;
+                        case 4:
+                            LCD_Clear();
+                            Display_Header("Mete Pri");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pri: ");
-//                             TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pri: ");
+                            TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-// 							addBouleMarriage(list, pri);
-//                             selected2 = -1;
-//                             break;
-//                         case 5:
-//                             LCD_Clear();
-//                             Display_Header("Mete Pri");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
+							addBouleMarriage(list, pri);
+                            selected2 = -1;
+                            break;
+                        case 5:
+                            LCD_Clear();
+                            Display_Header("Mete Pri");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pri: ");
-//                             TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pri: ");
+                            TP_SetDisplayArea(27, 15, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-// 							addBouleL4(list, pri);
-//                             break;
-//                         case 6:
-//                             LCD_Clear();
-//                             Display_Header("Pwent");
-//                             TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
-//                             memset(pwent, 0x00, sizeof(pwent));
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
+							addBouleL4(list, pri);
+                            break;
+                        case 6:
+                            LCD_Clear();
+                            Display_Header("Pwent");
+                            TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+                            memset(pwent, 0x00, sizeof(pwent));
 
-//                             TP_ScrGotoxyEx(3, 15);
-//                             TP_LcdPrintf("Pwent:");
-//                             TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
+                            TP_ScrGotoxyEx(3, 15);
+                            TP_LcdPrintf("Pwent:");
+                            TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
 
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_LOWCASE);
-//                             key_ret = TP_GetString((char*)pwent, 0x80|0x04|0x10, 1, 1);
-//                             if (key_ret == 0xFF) 
-//                                 break;
-//                             TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_LOWCASE);
+                            key_ret = TP_GetString((char*)pwent, 0x80|0x04|0x10, 1, 1);
+                            if (key_ret == 0xFF) 
+                                break;
+                            TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
 
-//                             TP_ScrGotoxyEx(3, 32);
-//                             TP_LcdPrintf("Pri:  ");
-//                             TP_SetDisplayArea(27, 32, MAX_SCREEN_WIDTH - 1, 49);
-//                             TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
-//                             TP_ShowInputNum(0, 0, 0);
-//                             TP_SetInputMode(INPUTMODE_MAX);
-//                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
-//                             if (key_ret == 0xFF) 
-//                                 break;
+                            TP_ScrGotoxyEx(3, 32);
+                            TP_LcdPrintf("Pri:  ");
+                            TP_SetDisplayArea(27, 32, MAX_SCREEN_WIDTH - 1, 49);
+                            TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
+                            TP_ShowInputNum(0, 0, 0);
+                            TP_SetInputMode(INPUTMODE_MAX);
+                            key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
+                            if (key_ret == 0xFF) 
+                                break;
 
-// 							addPwent(list, pri, atoi(pwent));
-//                             selected2 = -1;
-//                             break;
-//                         default:
-//                             break;
-//                     }
-//                 }
-//                 break;
-//             case 12:
-//                 deleteByIndex(list, sselected);
-// 				selected = list->size;
-//                 break;
-//             default:
-//                 break;
-//         }
-//     }
-//     // Free Stuff
-//     destroyList(list);
-//     freeItems(tirages, sizeTirage);
-// 	sizeTirage = 0;
-//     return;
-// }
+							addPwent(list, pri, atoi(pwent));
+                            selected2 = -1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case 12:
+                deleteByIndex(list, sselected);
+				selected = list->size;
+                break;
+            default:
+                break;
+        }
+    }
+    // Free Stuff
+    destroyList(list);
+    freeItems(tirages, sizeTirage);
+	sizeTirage = 0;
+    return;
+}
 
-// // OK
-// static void getFicheById(void) {
-//     uint8 keycode = 0;
-//     char temp[30], path[60];
-//     char *buffer = NULL, *bufferToken = NULL;
-//     int16 status_code = 0, size = 0, selected2 = 0;
-//     cJSON *json = NULL;
-//     Tirage *items = NULL;
-//     int32 ret = 0;
 
-//     LCD_Clear();
-//     Display_Header("Fich Pa ID");
-//     TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
-//     TP_ScrGotoxyEx(3, 15);
-//     TP_LcdPrintf("ID: ");
+// OK
+static void getFicheById(void) {
+    uint8 keycode = 0;
+    char temp[30], path[60];
+    char *buffer = NULL, *bufferToken = NULL;
+    int16 status_code = 0, size = 0, selected2 = 0;
+    cJSON *json = NULL;
+    Tirage *items = NULL;
+    int32 ret = 0;
 
-//     TP_SetDisplayArea(6, 23, 124, 45);
-//     TP_ScrGotoxyEx(6, 23);
-//     TP_SetInputModeControl(TP_KEY_OK, KEY_DEMO_CANCEL, KEY_DEMO_POUND);
-//     TP_ShowInputNum(0, 1, 1);
-//     memset(path, 0x00, sizeof(path));
-//     memset(temp, 0x00, sizeof(temp));
-//     strcpy(temp, "MGN-");
-//     keycode = TP_GetHzString(temp, 0, sizeof(temp) - 1);
-//     if (keycode == 0xFF) return;
-//     sprintf(path, "/api/games/find-fiche?barcode=%s", temp);
+    LCD_Clear();
+    Display_Header("Fich Pa ID");
+    TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
+    TP_ScrGotoxyEx(3, 15);
+    TP_LcdPrintf("ID: ");
 
-//     read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
-//     if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0)
-//     {
-//         if (status_code >= 200 && status_code <= 299) {
-//             json = cJSON_Parse(buffer);		
-// 			if (json != NULL)
-// 			{
-//                 cJSON *id = cJSON_GetObjectItemCaseSensitive(json, "ref_code");
-//                 cJSON *_id = cJSON_GetObjectItemCaseSensitive(json, "id");
-//                 cJSON *created_on = cJSON_GetObjectItemCaseSensitive(json, "created_on");
-//                 cJSON *boules = cJSON_GetObjectItemCaseSensitive(json, "boules");
-//                 cJSON *tirage_name = cJSON_GetObjectItemCaseSensitive(json, "tirage_name");
-//                 cJSON *montant = cJSON_GetObjectItemCaseSensitive(json, "montant");
-//                 cJSON *is_delete = cJSON_GetObjectItemCaseSensitive(json, "is_delete");
-//                 if (!cJSON_IsTrue(is_delete))
-//                 {
-//                     char *bStr = cJSON_Print(boules);
-//                     addTirageItem(&items, &size, id->valuestring, bStr, tirage_name->valuestring, montant->valuestring, _id->valueint, created_on->valuestring);
+    TP_SetDisplayArea(6, 23, 124, 45);
+    TP_ScrGotoxyEx(6, 23);
+    TP_SetInputModeControl(TP_KEY_OK, KEY_DEMO_CANCEL, KEY_DEMO_POUND);
+    TP_ShowInputNum(0, 1, 1);
+    memset(path, 0x00, sizeof(path));
+    memset(temp, 0x00, sizeof(temp));
+    strcpy(temp, "MGN-");
+    keycode = TP_GetHzString(temp, 0, sizeof(temp) - 1);
+    if (keycode == 0xFF) return;
+    sprintf(path, "/api/games/find-fiche?barcode=%s", temp);
+
+    read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+    if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0)
+    {
+        if (status_code >= 200 && status_code <= 299) {
+            json = cJSON_Parse(buffer);		
+			if (json != NULL)
+			{
+                cJSON *id = cJSON_GetObjectItemCaseSensitive(json, "ref_code");
+                cJSON *_id = cJSON_GetObjectItemCaseSensitive(json, "id");
+                cJSON *created_on = cJSON_GetObjectItemCaseSensitive(json, "created_on");
+                cJSON *boules = cJSON_GetObjectItemCaseSensitive(json, "boules");
+                cJSON *tirage_name = cJSON_GetObjectItemCaseSensitive(json, "tirage_name");
+                cJSON *montant = cJSON_GetObjectItemCaseSensitive(json, "montant");
+                cJSON *is_delete = cJSON_GetObjectItemCaseSensitive(json, "is_delete");
+                if (!cJSON_IsTrue(is_delete))
+                {
+                    char *bStr = cJSON_Print(boules);
+                    addTirageItem(&items, &size, id->valuestring, bStr, tirage_name->valuestring, montant->valuestring, _id->valueint, created_on->valuestring);
                     
-//                     if (json != NULL) {
-//                         cJSON_Delete(json);
-//                         json = NULL;
-//                     }
-//                     if (buffer != NULL) {
-//                         TP_FreeMemory((void**)&buffer);
-//                         buffer = NULL;
-//                     }
-//                     selected2 = 0;
-//                     while (selected2 >= 0) {
-//                         selected2 = LCD_Menu(items[0].id, menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
-//                         switch (selected2)
-//                         {
-//                             case 0:
-//                                 reprint_fiche(items[0]);
-//                                 break;
-//                             case 1:
-//                                 postFiches(items[0].boules);
-//                                 break;
-//                             case 2:
-//                                 if (yesNoModal("Siprime?") == TRUE) {
-//                                     char *json_string = NULL;
-//                                     cJSON *data = cJSON_CreateObject();
+                    if (json != NULL) {
+                        cJSON_Delete(json);
+                        json = NULL;
+                    }
+                    if (buffer != NULL) {
+                        TP_FreeMemory((void**)&buffer);
+                        buffer = NULL;
+                    }
+                    selected2 = 0;
+                    while (selected2 >= 0) {
+                        selected2 = LCD_Menu(items[0].id, menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
+                        switch (selected2)
+                        {
+                            case 0:
+                                reprint_fiche(items[0]);
+                                break;
+                            case 1:
+                                postFiches(items[0].boules);
+                                break;
+                            case 2:
+                                if (yesNoModal("Siprime?") == TRUE) {
+                                    char *json_string = NULL;
+                                    cJSON *data = cJSON_CreateObject();
 
-//                                     cJSON_AddNumberToObject(data, "ficheId", items[0]._id);
-//                                     cJSON_AddStringToObject(data, "delete", "True");
-//                                     json_string = cJSON_Print(data);
-//                                     TP_DbgSerialPrn("\r\nSiprime data =%s\r\n", json_string);
+                                    cJSON_AddNumberToObject(data, "ficheId", items[0]._id);
+                                    cJSON_AddStringToObject(data, "delete", "True");
+                                    json_string = cJSON_Print(data);
+                                    TP_DbgSerialPrn("\r\nSiprime data =%s\r\n", json_string);
 
 
-//                                     if (make_http_PUT(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", json_string, bufferToken, &status_code, &buffer) >= 0) {
-//                                         if (status_code >= 200 && status_code <= 299) {
-//                                             selected2 = -1;
-//                                         } else {
-//                                             // TODO
-//                                         }
-//                                     } else {
-//                                         // TODO
-//                                     }
+                                    if (make_http_PUT(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", json_string, bufferToken, &status_code, &buffer) >= 0) {
+                                        if (status_code >= 200 && status_code <= 299) {
+                                            selected2 = -1;
+                                        } else {
+                                            // TODO
+                                        }
+                                    } else {
+                                        // TODO
+                                    }
 
-//                                     if (json_string != NULL) {
-//                                         TP_FreeMemory((void**)&json_string);
-//                                         json_string = NULL;
-//                                     }
+                                    if (json_string != NULL) {
+                                        TP_FreeMemory((void**)&json_string);
+                                        json_string = NULL;
+                                    }
 
-//                                     if (data != NULL) {
-//                                         cJSON_Delete(data);
-//                                         data = NULL;
-//                                     }
-//                                 }
-//                                 break;
-//                             default:
-//                                 break;
-//                         }
-//                     }
-//                 }
-//                 if (json != NULL) {
-//                     cJSON_Delete(json);
-//                     json = NULL;
-//                 }
-// 			} else
-// 			{
-// 				handleJSONNULL();
-// 			}
-//         } else {
-//            Handle404Error(status_code, buffer);
-//         }
-//     } else {
-//         handleSocketError(ret);
-//     }
+                                    if (data != NULL) {
+                                        cJSON_Delete(data);
+                                        data = NULL;
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                if (json != NULL) {
+                    cJSON_Delete(json);
+                    json = NULL;
+                }
+			} else
+			{
+				handleJSONNULL();
+			}
+        } else {
+           Handle404Error(status_code, buffer);
+        }
+    } else {
+        handleSocketError(ret);
+    }
 
-//     if (json != NULL) {
-//         cJSON_Delete(json);
-//         json = NULL;
-//     }
+    if (json != NULL) {
+        cJSON_Delete(json);
+        json = NULL;
+    }
 
-//     if (buffer != NULL) {
-//         TP_FreeMemory((void**)&buffer);
-//         buffer = NULL;
-//     }
+    if (buffer != NULL) {
+        TP_FreeMemory((void**)&buffer);
+        buffer = NULL;
+    }
 
-//     if (bufferToken != NULL) {
-//         TP_FreeMemory((void**)&bufferToken);
-//         bufferToken = NULL;
-//     }
-//     freeTirageItems(items, size);
-//     size = 0;
-//     return;
-// }
+    if (bufferToken != NULL) {
+        TP_FreeMemory((void**)&bufferToken);
+        bufferToken = NULL;
+    }
+    freeTirageItems(items, size);
+    size = 0;
+    return;
+}
 
-// // AL OK
-// static void make_get_fiches(char *start_date, char *end_date) {
-//     uint16 status_code = 0, size = 0;
-//     char *buffer = NULL, *bufferToken = NULL;
-//     char path[96];
-//     cJSON *json = NULL;
-//     Tirage *items = NULL;
-//     int selected = 0, id = 0, selected2 = 0;
-//     int32 ret = 0;
+// AL OK
+static void make_get_fiches(char *start_date, char *end_date) {
+    uint16 status_code = 0, size = 0;
+    char *buffer = NULL, *bufferToken = NULL;
+    char path[96];
+    cJSON *json = NULL;
+    Tirage *items = NULL;
+    int selected = 0, id = 0, selected2 = 0;
+    int32 ret = 0;
 
-//     memset(path, 0x00, sizeof(path));
-//     read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+    memset(path, 0x00, sizeof(path));
+    read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
 
-//     sprintf(path, "/api/games/v2/fiche?start_date=%s&end_date=%s", start_date, end_date);
+    sprintf(path, "/api/games/v2/fiche?start_date=%s&end_date=%s", start_date, end_date);
 
-//     if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0)
-//     {
-//         if (status_code >= 200 && status_code <= 299) {
-//             json = cJSON_Parse(buffer);		
-// 			if (json != NULL)
-// 			{
-//                 if (cJSON_IsArray(json))
-// 				{
-// 					cJSON *element;
-// 					cJSON_ArrayForEach(element, json) 
-// 					{
-// 						cJSON *id = cJSON_GetObjectItemCaseSensitive(element, "ref_code");
-// 						cJSON *_id = cJSON_GetObjectItemCaseSensitive(element, "id");
-// 						cJSON *created_on = cJSON_GetObjectItemCaseSensitive(element, "created_on");
-// 						cJSON *boules = cJSON_GetObjectItemCaseSensitive(element, "boules");
-// 						cJSON *tirage_name = cJSON_GetObjectItemCaseSensitive(element, "tirage_name");
-// 						cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
-// 						cJSON *is_delete = cJSON_GetObjectItemCaseSensitive(element, "is_delete");
+    if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0)
+    {
+        if (status_code >= 200 && status_code <= 299) {
+            json = cJSON_Parse(buffer);		
+			if (json != NULL)
+			{
+                if (cJSON_IsArray(json))
+				{
+					cJSON *element;
+					cJSON_ArrayForEach(element, json) 
+					{
+						cJSON *id = cJSON_GetObjectItemCaseSensitive(element, "ref_code");
+						cJSON *_id = cJSON_GetObjectItemCaseSensitive(element, "id");
+						cJSON *created_on = cJSON_GetObjectItemCaseSensitive(element, "created_on");
+						cJSON *boules = cJSON_GetObjectItemCaseSensitive(element, "boules");
+						cJSON *tirage_name = cJSON_GetObjectItemCaseSensitive(element, "tirage_name");
+						cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
+						cJSON *is_delete = cJSON_GetObjectItemCaseSensitive(element, "is_delete");
 
-// 						if (!cJSON_IsTrue(is_delete))
-// 						{
-// 							char *bStr = cJSON_Print(boules);
-// 							addTirageItem(&items, &size, id->valuestring, bStr, tirage_name->valuestring, montant->valuestring, _id->valueint, created_on->valuestring);
-// 						}
-// 					}
-// 				}
-//                 cJSON_Delete(json);
-//                 json = NULL;
-// 			} else
-// 			{
-// 				handleJSONNULL();
-// 			}
-//         } else {
-//             // TODO
-//         }    
-//     } else {
-//         handleSocketError(ret);
-//     }
+						if (!cJSON_IsTrue(is_delete))
+						{
+							char *bStr = cJSON_Print(boules);
+							addTirageItem(&items, &size, id->valuestring, bStr, tirage_name->valuestring, montant->valuestring, _id->valueint, created_on->valuestring);
+						}
+					}
+				}
+                cJSON_Delete(json);
+                json = NULL;
+			} else
+			{
+				handleJSONNULL();
+			}
+        } else {
+            // TODO
+        }    
+    } else {
+        handleSocketError(ret);
+    }
 
-//     if (json != NULL) {
-//         cJSON_Delete(json);
-//         json = NULL;
-//     }
+    if (json != NULL) {
+        cJSON_Delete(json);
+        json = NULL;
+    }
 
-//     if (buffer != NULL) {
-//         TP_FreeMemory((void**)&buffer);
-//         buffer = NULL;
-//     }
+    if (buffer != NULL) {
+        TP_FreeMemory((void**)&buffer);
+        buffer = NULL;
+    }
 
-//     // Display Menu
-//     if (size == 0)
-//     {
-//        handleEmptyList();
-//     } else {
-//         while (selected >= 0 && size > 0)
-//         {
-//             // size2 = 0;
-//             selected = LCD_MenuTirage("Lis Fich", items, size, selected, &id);
-//             selected2 = 0;
+    // Display Menu
+    if (size == 0)
+    {
+       handleEmptyList();
+    } else {
+        while (selected >= 0 && size > 0)
+        {
+            // size2 = 0;
+            selected = LCD_MenuTirage("Lis Fich", items, size, selected, &id);
+            selected2 = 0;
             
-//             if (selected >= 0)
-//             {
-//                 // Lot Opsyon
-//                 while (selected2 >= 0)
-//                 {
-//                     selected2 = LCD_Menu(items[id].id, menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
-//                     switch (selected2)
-//                     {
-//                     case 0:
-//                         reprint_fiche(items[selected]);
-//                         break;
-//                     case 1:
-//                         postFiches(items[selected].boules);
-//                         selected2 = -1;
-//                         break;
-//                     case 2:
-//                         if (yesNoModal("Siprime?") == TRUE) {
-//                             char *json_string = NULL;
-//                             cJSON *data = cJSON_CreateObject();
+            if (selected >= 0)
+            {
+                // Lot Opsyon
+                while (selected2 >= 0)
+                {
+                    selected2 = LCD_Menu(items[id].id, menu, sizeof(menu) / MAX_CHAR_ITEMS, selected2);
+                    switch (selected2)
+                    {
+                    case 0:
+                        reprint_fiche(items[selected]);
+                        break;
+                    case 1:
+                        postFiches(items[selected].boules);
+                        selected2 = -1;
+                        break;
+                    case 2:
+                        if (yesNoModal("Siprime?") == TRUE) {
+                            char *json_string = NULL;
+                            cJSON *data = cJSON_CreateObject();
 
-//                             cJSON_AddNumberToObject(data, "ficheId", items[id]._id);
-//                             cJSON_AddStringToObject(data, "delete", "True");
-//                             json_string = cJSON_Print(data);
+                            cJSON_AddNumberToObject(data, "ficheId", items[id]._id);
+                            cJSON_AddStringToObject(data, "delete", "True");
+                            json_string = cJSON_Print(data);
 
-//                             if ((ret = make_http_PUT(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", json_string, bufferToken, &status_code, &buffer)) >= 0) {
-//                                 if (status_code >= 200 && status_code <= 299) {
-// 									size = deleteTirageByIndex(items, id, size);
-//                                     if (size > 0) selected = size;
-//                                     selected2 = -1;
-//                                 } else {
-//                                     Handle404Error(status_code, "Paka Efase Fich Sa!");
-//                                 }
-//                             } else {
-//                                 handleSocketError(ret);
-//                             }
+                            if ((ret = make_http_PUT(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", json_string, bufferToken, &status_code, &buffer)) >= 0) {
+                                if (status_code >= 200 && status_code <= 299) {
+									size = deleteTirageByIndex(items, id, size);
+                                    if (size > 0) selected = size;
+                                    selected2 = -1;
+                                } else {
+                                    Handle404Error(status_code, "Paka Efase Fich Sa!");
+                                }
+                            } else {
+                                handleSocketError(ret);
+                            }
 
-//                             if (buffer != NULL) {
-//                                 TP_FreeMemory((void**)&buffer);
-//                                 buffer = NULL;
-//                             }
+                            if (buffer != NULL) {
+                                TP_FreeMemory((void**)&buffer);
+                                buffer = NULL;
+                            }
 
-//                             if (json_string != NULL) {
-//                                 TP_FreeMemory((void**)&json_string);
-//                                 json_string = NULL;
-//                             }
+                            if (json_string != NULL) {
+                                TP_FreeMemory((void**)&json_string);
+                                json_string = NULL;
+                            }
 
-//                             if (data != NULL) {
-//                                 cJSON_Delete(data);
-//                                 data = NULL;
-//                             }
-//                         }
-//                         break;
-//                     default:
-//                         break;
-//                     }
-//                 }
-//             }
-//         }
-//     }
+                            if (data != NULL) {
+                                cJSON_Delete(data);
+                                data = NULL;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
-//     if (bufferToken != NULL) {
-//         TP_FreeMemory((void**)&bufferToken);
-//         bufferToken = NULL;
-//     }
+    if (bufferToken != NULL) {
+        TP_FreeMemory((void**)&bufferToken);
+        bufferToken = NULL;
+    }
 
-//     freeTirageItems(items, size);
+    freeTirageItems(items, size);
 
-//     return;
-// }
+    return;
+}
 
-// // OK
-// void getFiches(void)
-// {
-//     TP_DateTime dateTime;
-//     int8 selected = 0;
-// 	char start_date[11];
+// OK
+void getFiches(void)
+{
+    TP_DateTime dateTime;
+    int8 selected = 0;
+	char start_date[11];
 	
-// 	const char menu[][MAX_CHAR_ITEMS] = {
-// 		"1. Pa ID",
-// 		"2. Pou 1 Jou"
-// 	};
+	const char menu[][MAX_CHAR_ITEMS] = {
+		"1. Pa ID",
+		"2. Pou 1 Jou"
+	};
     
-// 	memset(start_date, 0x00, sizeof(start_date));
-//     TP_GetDateTime(&dateTime);
+	memset(start_date, 0x00, sizeof(start_date));
+    TP_GetDateTime(&dateTime);
 
-//     while (selected >= 0)
-// 	{
-// 		selected = LCD_Menu("Cheche Fich", menu, sizeof(menu) / MAX_CHAR_ITEMS, selected);
-// 		switch (selected)
-// 		{
-// 			case 0:
-// 				getFicheById();
-// 				break;
-// 			case 1:
-// 				sprintf(start_date, "%4d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
-// 				make_get_fiches(start_date, start_date);
-// 				break;
-// 			default:
-// 				break;
-// 		}
-// 	}
-// }
+    while (selected >= 0)
+	{
+		selected = LCD_Menu("Cheche Fich", menu, sizeof(menu) / MAX_CHAR_ITEMS, selected);
+		switch (selected)
+		{
+			case 0:
+				getFicheById();
+				break;
+			case 1:
+				sprintf(start_date, "%4d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
+				make_get_fiches(start_date, start_date);
+				break;
+			default:
+				break;
+		}
+	}
+    return;
+}
 
 
-// // OK
-// int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage)
-// {
-// 	uint16 status_code = 0;
-// 	char *buffer = NULL;
-// 	char *bufferToken = NULL;	
-//     char *jsonStr = NULL;
-// 	cJSON *root = NULL;
-// 	cJSON *arrayBoul = NULL;
-// 	cJSON *ficheData = NULL;
-// 	int state = 0, i = 0, x = 0;
-//     int32 ret = 0;
+// OK
+int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage)
+{
+	uint16 status_code = 0;
+	char *buffer = NULL;
+	char *bufferToken = NULL;	
+    char *jsonStr = NULL;
+	cJSON *root = NULL;
+	cJSON *arrayBoul = NULL;
+	cJSON *ficheData = NULL;
+	int state = 0, i = 0, x = 0;
+    int32 ret = 0;
 
-// 	read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+	read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
 
-// 	root = cJSON_CreateObject();
-// 	arrayBoul = cJSON_CreateArray();
-// 	ficheData = cJSON_CreateArray();
+	root = cJSON_CreateObject();
+	arrayBoul = cJSON_CreateArray();
+	ficheData = cJSON_CreateArray();
 	
-// 	i = 0;
-// 	while (i < list->size)
-// 	{
-// 		cJSON *tirage = cJSON_CreateObject();
-// 		cJSON_AddStringToObject(tirage, "boule", list->items[i].boul);
-// 		cJSON_AddStringToObject(tirage, "option", list->items[i].option);
-// 		cJSON_AddStringToObject(tirage, "lotto", list->items[i].lotto);
-// 		cJSON_AddNumberToObject(tirage, "montant", atoi(list->items[i].pri));
-// 		cJSON_AddNumberToObject(tirage, "id", i + 1);
-// 		cJSON_AddItemToArray(arrayBoul, tirage);
-// 		i++;
-// 	}
+	i = 0;
+	while (i < list->size)
+	{
+		cJSON *tirage = cJSON_CreateObject();
+		cJSON_AddStringToObject(tirage, "boule", list->items[i].boul);
+		cJSON_AddStringToObject(tirage, "option", list->items[i].option);
+		cJSON_AddStringToObject(tirage, "lotto", list->items[i].lotto);
+		cJSON_AddNumberToObject(tirage, "montant", atoi(list->items[i].pri));
+		cJSON_AddNumberToObject(tirage, "id", i + 1);
+		cJSON_AddItemToArray(arrayBoul, tirage);
+		i++;
+	}
 
-// 	if (sizeTirage == 0)
-// 	{
-// 		cJSON_AddNumberToObject(root, "tirage", id_tirage);
-// 		cJSON_AddItemToObject(root, "bouleList", arrayBoul);
-// 	} else 
-// 	{
-// 		x = 0;
-// 		while (x < sizeTirage)
-// 		{
-// 			cJSON *tir = cJSON_CreateObject();
-// 			cJSON_AddNumberToObject(tir, "tirage", tirages[x].id);
-//             cJSON_AddItemReferenceToObject(tir, "bouleLists", arrayBoul);
+	if (sizeTirage == 0)
+	{
+		cJSON_AddNumberToObject(root, "tirage", id_tirage);
+		cJSON_AddItemToObject(root, "bouleList", arrayBoul);
+	} else 
+	{
+		x = 0;
+		while (x < sizeTirage)
+		{
+			cJSON *tir = cJSON_CreateObject();
+			cJSON_AddNumberToObject(tir, "tirage", tirages[x].id);
+            cJSON_AddItemReferenceToObject(tir, "bouleLists", arrayBoul);
 
-// 			// cJSON_AddItemToObject(tir, "bouleLists", arrayBoul);
-// 			cJSON_AddItemToArray(ficheData, tir);
-// 			x++;
-// 		}
+			// cJSON_AddItemToObject(tir, "bouleLists", arrayBoul);
+			cJSON_AddItemToArray(ficheData, tir);
+			x++;
+		}
 
-// 		cJSON_AddItemToObject(root, "ficheData", ficheData);
-// 	}
+		cJSON_AddItemToObject(root, "ficheData", ficheData);
+	}
 	
-// 	jsonStr = cJSON_Print(root);
+	jsonStr = cJSON_Print(root);
 
-// 	if (sizeTirage == 0)
-// 	{
-// 		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
-// 		{
-// 			handleSocketError(ret);
-// 			state = -1;
-// 		} else
-// 		{
-// 			if (status_code >= 200 && status_code <= 299) 
-// 			{
-// 				state = 0;
-// 				print_fiche(buffer, 0);
-// 			} else 
-// 			{
-// 				state = -1;
-//                 Handle404Error(status_code, buffer);
-// 			}
-// 		}
-// 	} else 
-// 	{
-// 		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/v2/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
-// 		{
-// 			handleSocketError(ret);
-// 			state = -1;
-// 		} else
-// 		{
-// 			if (status_code >= 200 && status_code <= 299) 
-// 			{
-// 				state = 0;
-// 				print_fiche(buffer, 1);
-// 			} else 
-// 			{
-// 				state = -1;
-//                 Handle404Error(status_code, buffer);
-// 			}
-// 		}
-// 	}
+	if (sizeTirage == 0)
+	{
+		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
+		{
+			handleSocketError(ret);
+			state = -1;
+		} else
+		{
+			if (status_code >= 200 && status_code <= 299) 
+			{
+				state = 0;
+				print_fiche(buffer, 0);
+			} else 
+			{
+				state = -1;
+                Handle404Error(status_code, buffer);
+			}
+		}
+	} else 
+	{
+		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/v2/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
+		{
+			handleSocketError(ret);
+			state = -1;
+		} else
+		{
+			if (status_code >= 200 && status_code <= 299) 
+			{
+				state = 0;
+				print_fiche(buffer, 1);
+			} else 
+			{
+				state = -1;
+                Handle404Error(status_code, buffer);
+			}
+		}
+	}
 	
-// 	if (jsonStr != NULL)
-// 	{
-// 		TP_FreeMemory((void**)&jsonStr);
-// 		jsonStr = NULL;
-// 	}
-// 	if (buffer != NULL)
-// 	{
-// 		TP_FreeMemory((void**)&buffer);
-// 		buffer = NULL;
-// 	}
-//     if (bufferToken != NULL)
-// 	{
-// 		TP_FreeMemory((void**)&bufferToken);
-// 		bufferToken = NULL;
-// 	}
-//     if (root != NULL)
-// 	{
-// 		cJSON_Delete(root);
-// 		root = NULL;
-// 	}
-// 	return state;
-// }
+	if (jsonStr != NULL)
+	{
+		TP_FreeMemory((void**)&jsonStr);
+		jsonStr = NULL;
+	}
+	if (buffer != NULL)
+	{
+		TP_FreeMemory((void**)&buffer);
+		buffer = NULL;
+	}
+    if (bufferToken != NULL)
+	{
+		TP_FreeMemory((void**)&bufferToken);
+		bufferToken = NULL;
+	}
+    if (root != NULL)
+	{
+		cJSON_Delete(root);
+		root = NULL;
+	}
+	return state;
+}
 
 
-// // OK
-// void getWinningFiches(void)
-// {	TP_DateTime dateTime1;
-//     TP_DateTime dateTime2;
-//     char path[115], str[90];
-//     char *bufferToken = NULL, *buffer = NULL;
-//     Boolean result = FALSE;
-//     uint16 status_code = 0;
-//     cJSON *root = NULL, *data = NULL, *count = NULL;
-//     int32 count_items = 0, index = 0, ret = 0;
-//     char start_date[11], end_date[11];
-//     uint8 key = 0;
-//     TP_ListBoxRect listRect = {2, 17, 125, 62};
-//     char *todisplay = NULL;
+// OK
+void getWinningFiches(void)
+{	TP_DateTime dateTime1;
+    TP_DateTime dateTime2;
+    char path[115], str[90];
+    char *bufferToken = NULL, *buffer = NULL;
+    Boolean result = FALSE;
+    uint16 status_code = 0;
+    cJSON *root = NULL, *data = NULL, *count = NULL;
+    int32 count_items = 0, index = 0, ret = 0;
+    char start_date[11], end_date[11];
+    uint8 key = 0;
+    TP_ListBoxRect listRect = {2, 17, 125, 62};
+    char *todisplay = NULL;
 
-//     TP_DisplayInfo displayInfo =
-//     {
-//         "Dat Komanse:",
-//         ALIGN_LEFT,
-//         "OK",
-//         "Bak",
-//         TP_KEY_OK,
-//         TP_KEY_CANCEL,
-//         TP_KEY_NONE,
-//         TP_KEY_NONE,
-//         ASCII
-//     };
+    TP_DisplayInfo displayInfo =
+    {
+        "Dat Komanse:",
+        ALIGN_LEFT,
+        "OK",
+        "Bak",
+        TP_KEY_OK,
+        TP_KEY_CANCEL,
+        TP_KEY_NONE,
+        TP_KEY_NONE,
+        ASCII
+    };
 
-//     TP_ScrCls();
-//     TP_Kbflush();
-//     TP_ScrAttrSet(0);
-//     TP_ScrFontSet(ASCII);
-//     TP_ScrSpaceSet(0, 2);
+    TP_ScrCls();
+    TP_Kbflush();
+    TP_ScrAttrSet(0);
+    TP_ScrFontSet(ASCII);
+    TP_ScrSpaceSet(0, 2);
 
-//     memset(str, 0x00, sizeof(str));
-//     memset(path, 0x00, sizeof(path));
+    memset(str, 0x00, sizeof(str));
+    memset(path, 0x00, sizeof(path));
 
-//     while (TRUE) {
-//         LCD_Clear();
-//         TP_GetDateTime(&dateTime1);
-//         displayInfo.strTitle = "Dat Komanse";
-//         result = TP_DateInput(&displayInfo, &dateTime1.Date);
-//         if (result == FALSE)
-//             return;
+    while (TRUE) {
+        LCD_Clear();
+        TP_GetDateTime(&dateTime1);
+        displayInfo.strTitle = "Dat Komanse";
+        result = TP_DateInput(&displayInfo, &dateTime1.Date);
+        if (result == FALSE)
+            return;
 
-//         displayInfo.strTitle = "Dat Fen";
-//         TP_GetDateTime(&dateTime2);
-//         result = TP_DateInput(&displayInfo, &dateTime2.Date);
-//         if (result == FALSE)
-//             return;
+        displayInfo.strTitle = "Dat Fen";
+        TP_GetDateTime(&dateTime2);
+        result = TP_DateInput(&displayInfo, &dateTime2.Date);
+        if (result == FALSE)
+            return;
 
-//         memset(path, 0, sizeof(path));
-//         memset(start_date, 0, sizeof(start_date));
-//         memset(end_date, 0, sizeof(end_date));
+        memset(path, 0, sizeof(path));
+        memset(start_date, 0, sizeof(start_date));
+        memset(end_date, 0, sizeof(end_date));
 
-//         sprintf(start_date, "%d-%02d-%02d", dateTime1.Date.Year, dateTime1.Date.Month, dateTime1.Date.Day);
-//         sprintf(end_date, "%d-%02d-%02d", dateTime2.Date.Year, dateTime2.Date.Month, dateTime2.Date.Day);
-//         sprintf(path, "/api/games/fiche-win?start_date=%s&end_date=%s", start_date, end_date);
+        sprintf(start_date, "%d-%02d-%02d", dateTime1.Date.Year, dateTime1.Date.Month, dateTime1.Date.Day);
+        sprintf(end_date, "%d-%02d-%02d", dateTime2.Date.Year, dateTime2.Date.Month, dateTime2.Date.Day);
+        sprintf(path, "/api/games/fiche-win?start_date=%s&end_date=%s", start_date, end_date);
 
-//         read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+        read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
         
-//         if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
-//             LCD_Clear();
-//             if (status_code >= 200 && status_code <= 299) {
-//                 Display_Header("Fich Ganyan");
-//                 root = cJSON_Parse(buffer);
-//                 if (root != NULL)
-//                 {
-//                     count = cJSON_GetObjectItemCaseSensitive(root, "count");
-//                     data = cJSON_GetObjectItemCaseSensitive(root, "data");
+        if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
+            LCD_Clear();
+            if (status_code >= 200 && status_code <= 299) {
+                Display_Header("Fich Ganyan");
+                root = cJSON_Parse(buffer);
+                if (root != NULL)
+                {
+                    count = cJSON_GetObjectItemCaseSensitive(root, "count");
+                    data = cJSON_GetObjectItemCaseSensitive(root, "data");
                     
-//                     if (buffer != NULL) {
-//                         TP_FreeMemory((void**)&buffer);
-//                         buffer = NULL;
-//                     }
-//                     count_items = (int32)(count->valueint);
+                    if (buffer != NULL) {
+                        TP_FreeMemory((void**)&buffer);
+                        buffer = NULL;
+                    }
+                    count_items = (int32)(count->valueint);
                     
-//                     if (cJSON_IsArray(data)) {
-//                         index = 0;
-//                         while (index < count_items)
-//                         {
-//                             cJSON *element = cJSON_GetArrayItem(data, index);
-//                             cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
-//                             cJSON *ref_code = cJSON_GetObjectItemCaseSensitive(element, "ref_code");
-//                             cJSON *perte = cJSON_GetObjectItemCaseSensitive(element, "perte");
+                    if (cJSON_IsArray(data)) {
+                        index = 0;
+                        while (index < count_items)
+                        {
+                            cJSON *element = cJSON_GetArrayItem(data, index);
+                            cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
+                            cJSON *ref_code = cJSON_GetObjectItemCaseSensitive(element, "ref_code");
+                            cJSON *perte = cJSON_GetObjectItemCaseSensitive(element, "perte");
 
-//                             sprintf(str, "ID: %s\nMontan: %s\nKob: %s\n\n", ref_code->valuestring, montant->valuestring, perte->valuestring);
+                            sprintf(str, "ID: %s\nMontan: %s\nKob: %s\n\n", ref_code->valuestring, montant->valuestring, perte->valuestring);
 
-//                             concatString(&todisplay, (char *)str);
-//                             index ++;	
-//                         }
-//                     }
+                            concatString(&todisplay, (char *)str);
+                            index ++;	
+                        }
+                    }
                     
-//                     showText(&displayInfo, listRect, todisplay, print_winnings_fiche, data, count_items, start_date, end_date);
-//                     break;
-//                 } 
-//                 else 
-//                 {
-//                     handleJSONNULL();
-//                 }   
-//             } else {
-//                 Handle404Error(status_code, buffer);
-//             }
-//         } else {
-//             LCD_Clear();
-//             TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//             TP_ScrClsDisplayArea();
-//             TP_ScrGotoxyEx(63 - 28, 31 - 7);
-//             TP_LcdPrintf("Ere! Reeseye!");
+                    showText(&displayInfo, listRect, todisplay, print_winnings_fiche, data, count_items, start_date, end_date);
+                    break;
+                } 
+                else 
+                {
+                    handleJSONNULL();
+                }   
+            } else {
+                Handle404Error(status_code, buffer);
+            }
+        } else {
+            LCD_Clear();
+            TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+            TP_ScrClsDisplayArea();
+            TP_ScrGotoxyEx(63 - 28, 31 - 7);
+            TP_LcdPrintf("Ere! Reeseye!");
 
-//             TP_ScrGotoxyEx(2, 63 - 7);
-//             TP_LcdPrintf("Wi=OK!");
-//             key = waitforKey();
-//             if (key == TP_KEY_OK)
-//                 continue;
-//             else
-//                 break;;
-//         }
-//     }
+            TP_ScrGotoxyEx(2, 63 - 7);
+            TP_LcdPrintf("Wi=OK!");
+            key = waitforKey();
+            if (key == TP_KEY_OK)
+                continue;
+            else
+                break;;
+        }
+    }
 
-//     if (todisplay != NULL) {
-//         TP_FreeMemory((void**)&todisplay);
-//         todisplay = NULL;
-//     }
-//     if (bufferToken != NULL) {
-//         TP_FreeMemory((void**)&bufferToken);
-//         bufferToken = NULL;
-//     }
-//     if (buffer != NULL) {
-//         TP_FreeMemory((void**)&buffer);
-//         buffer = NULL;
-//     }
-//     if (root != NULL) {
-//         cJSON_Delete(root);
-//         root = NULL;
-//     }
-//     return;
-// }
+    if (todisplay != NULL) {
+        TP_FreeMemory((void**)&todisplay);
+        todisplay = NULL;
+    }
+    if (bufferToken != NULL) {
+        TP_FreeMemory((void**)&bufferToken);
+        bufferToken = NULL;
+    }
+    if (buffer != NULL) {
+        TP_FreeMemory((void**)&buffer);
+        buffer = NULL;
+    }
+    if (root != NULL) {
+        cJSON_Delete(root);
+        root = NULL;
+    }
+    return;
+}
 
 
 // OK

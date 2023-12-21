@@ -805,8 +805,7 @@ void TP_PopupMessageTimed( uchar *msg,uint32 Ms )
         }
         if (TP_Kbhit())
         {
-            ///������˳�
-            TP_Kbflush(); ///��Ҫ��հ����еļ�ֵ
+            TP_Kbflush(); 
             TP_ScrRestore(1);
             TP_TimerFree(timerid);
             return;

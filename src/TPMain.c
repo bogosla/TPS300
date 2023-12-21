@@ -17,6 +17,7 @@
 
 #include "M_Menu.h"
 #include "TP_StartPic.h"
+#include "TP_TimeSet.h"
 
 
 // The APP SoftwareVersion
@@ -24,15 +25,15 @@ const char SoftwareVersion[10] = {"V1.0\0"};
 
 
 const char menuItems[][MAX_CHAR_ITEMS] = {
-    "1. Kreye Fich",
-    "2. Cheche Fich",
-    "3. Jwenn Rapo",
-    "4. Lo Ganyan",
-    "5. Fich Ganyan",
-    "6. Pwofil",
-    "7. Konfigire Dat",
-    "8. Teste Enprimant",
-    "9. Dekonekte"
+    "1.Kreye Fich",
+    "2.Cheche Fich",
+    "3.Jwenn Rapo",
+    "4.Lo Ganyan",
+    "5.Fich Ganyan",
+    "6.Pwofil",
+    "7.Konfigire Dat",
+    "8.Teste Enprimant",
+    "9.Dekonekte"
 };
 
 uint8 count = sizeof(menuItems) / MAX_CHAR_ITEMS;
@@ -124,6 +125,7 @@ static void MgnAPP(void) {
         __DATE__,
         __TIME__
     );
+
     TP_DbgSerialPrn("SIM Slot: %d\n", TP_MobileCardGetActiveCardSlot());
 
     TP_SetCurrentCharSet(CHARSET_ASCII);
@@ -141,41 +143,41 @@ static void MgnAPP(void) {
 
     TP_SetVolume(SPEECH_VOLUMN, VOLUME_7);
     TP_SetVolume(MICROPHONE_VOLUMN, VOLUME_7);
+    TP_BanIncomingCall(TRUE);
 
-    TP_DbgSerialPrnLevel(0);
     running = TRUE;
 
     while(running) {
-        isLoggedIn = postHandleLogin();
-        if (isLoggedIn == TRUE)
-            selected = 0;
-        else
-            selected = -1;
+        // isLoggedIn = postHandleLogin();
+        // if (isLoggedIn == TRUE)
+        //     selected = 0;
+        // else
+        //     selected = -1;
         
         while (selected >= 0) {
             selected = LCD_Menu("MGNLotto", menuItems, count, selected);
             if (selected < 0) selected = 30;
             switch (selected) {
                 case 0:
-                    // postFiches(NULL);
+                    postFiches(NULL);
                     break;
                 case 1:
-                    // getFiches();
+                    getFiches();
                     break;
                 case 2:
-                    // getRapports();
+                    getRapports();
                     break;
                 case 3:
-                    // getTirages();
+                    getTirages();
                     break;
                 case 4:
-                    // getWinningFiches();
+                    getWinningFiches();
                     break;
                 case 5:
                     getConfiguration();
                     break;
                 case 6:
-                    // TP_SetDate();
+                    TP_SetDate();
                     break;
                 case 7:
                     test_printer();
@@ -196,7 +198,7 @@ static void MgnAPP(void) {
 
 void TPMain(void)
 {
-    TP_DbgSerialPrnLevel(0);
+    TP_DbgSerialPrnLevel(4);
     TP_SetDefaultPortRate("115200");
     TP_FactoryMode_Register_GetSoftwareVersion_Function(TP_GetProductInfo);
     TP_SetBatteryLowWarningPic(MyBatteryLowWarningPic);
@@ -204,7 +206,7 @@ void TPMain(void)
 
     TP_SystemInit();
 
-    TP_SetCurrentCharSet(CHARSET_WEST);
+    TP_SetCurrentCharSet(CHARSET_ASCII);
 
     TP_kbLight(1);
     TP_ScrBackLight(1);

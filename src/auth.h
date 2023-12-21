@@ -29,8 +29,11 @@
 //     ----------------------------------------------------------------------------------------
 // */
 Boolean postHandleLogin(void);
-// void getRapports(void);
-// void getTirages(void); 
+
+void getRapports(void);
+
+void getTirages(void); 
+
 void getConfiguration(void);
 
 #endif /* AUTH_H_ */

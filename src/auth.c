@@ -89,6 +89,7 @@ void getConfiguration(void) {
 }
 
 
+
 Boolean postHandleLogin(void) {
     Boolean isRunning = TRUE;
     uint8 key, key_ret;
@@ -176,6 +177,7 @@ Boolean postHandleLogin(void) {
                     // if ((strcmp(role->valuestring, "agent") == 0 && strcmp(imei->valuestring, (char*)imeiStr) == 0))
                     if (1 == 1)
                     {
+                        
                         success = TRUE;
                         write_to_file(ACCESS_TOKEN_FILE, accessToken->valuestring);
                         write_to_file(INFO_USER_FILE, buffer);
@@ -248,214 +250,217 @@ Boolean postHandleLogin(void) {
 }
 
 
-// void getRapports(void) {
-//     TP_DateTime dateTime1;
-//     TP_DateTime dateTime2;
-//     char path[90];
-//     char *bufferToken = NULL, *buffer = NULL;
-//     Boolean result = FALSE, isRunning = TRUE;
-//     uint16 status_code = 0;
 
-//     char start_date[11], end_date[11];
-//     uint8 key = 0;
+void getRapports(void) {
+    TP_DateTime dateTime1;
+    TP_DateTime dateTime2;
+    char path[90];
+    char *bufferToken = NULL, *buffer = NULL;
+    Boolean result = FALSE, isRunning = TRUE;
+    uint16 status_code = 0;
 
-//     TP_DisplayInfo displayInfo =
-//     {
-//         "Dat Komanse:",
-//         ALIGN_LEFT,
-//         "OK",
-//         "Bak",
-//         TP_KEY_OK,
-//         TP_KEY_CANCEL,
-//         TP_KEY_NONE,
-//         TP_KEY_NONE,
-//         ASCII
-//     };
+    char start_date[11], end_date[11];
+    uint8 key = 0;
 
-//     isRunning = TRUE;
-//     while (isRunning) {
-//         LCD_Clear();
-//         TP_GetDateTime(&dateTime1);
-//         displayInfo.strTitle = "Dat Komanse";
-//         result = TP_DateInput(&displayInfo, &dateTime1.Date);
-//         if (result == FALSE)
-//             return;
+    TP_DisplayInfo displayInfo =
+    {
+        "Dat Komanse:",
+        ALIGN_LEFT,
+        "OK",
+        "Bak",
+        TP_KEY_OK,
+        TP_KEY_CANCEL,
+        TP_KEY_NONE,
+        TP_KEY_NONE,
+        ASCII
+    };
 
-//         displayInfo.strTitle = "Dat Fen";
-//         TP_GetDateTime(&dateTime2);
-//         result = TP_DateInput(&displayInfo, &dateTime2.Date);
-//         if (result == FALSE)
-//             return;
+    isRunning = TRUE;
+    while (isRunning) {
+        LCD_Clear();
+        TP_GetDateTime(&dateTime1);
+        displayInfo.strTitle = "Dat Komanse";
+        result = TP_DateInput(&displayInfo, &dateTime1.Date);
+        if (result == FALSE)
+            return;
 
-//         memset(path, 0, sizeof(path));
-//         memset(start_date, 0, sizeof(start_date));
-//         memset(end_date, 0, sizeof(end_date));
+        displayInfo.strTitle = "Dat Fen";
+        TP_GetDateTime(&dateTime2);
+        result = TP_DateInput(&displayInfo, &dateTime2.Date);
+        if (result == FALSE)
+            return;
 
-//         sprintf(start_date, "%d-%02d-%02d", dateTime1.Date.Year, dateTime1.Date.Month, dateTime1.Date.Day);
-//         sprintf(end_date, "%d-%02d-%02d", dateTime2.Date.Year, dateTime2.Date.Month, dateTime2.Date.Day);
-//         sprintf(path, "/api/games/rapports?start_date=%s&end_date=%s", start_date, end_date);
+        memset(path, 0, sizeof(path));
+        memset(start_date, 0, sizeof(start_date));
+        memset(end_date, 0, sizeof(end_date));
 
-//         read_from_file(ACCESS_TOKEN_FILE, &bufferToken);   
-//         if (make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer) >= 0) {
-//                 LCD_Clear();
-//                 TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//                 TP_ScrClsDisplayArea();
-//                 TP_ScrGotoxyEx(63 - 20, 31 - 7);
-//                 if (status_code >= 200 && status_code <= 299) {
-//                     TP_LcdPrintf("Enprime...");
-//                     if (print_rapport(buffer, start_date, end_date) == TRUE) {
-//                         TP_LcdPrintf("Enprime!  ");
-//                         waitforKey();
-//                         // isRunning = FALSE;
-//                         break;
-//                     }
-//                 } else {
-//                     // ere
-//                     Handle404Error(status_code, buffer);
-//                 }
-//         } else {
-//             LCD_Clear();
-//             TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-//             TP_ScrClsDisplayArea();
-//             TP_ScrGotoxyEx(63 - 28, 31 - 7);
-//             TP_LcdPrintf("Ere! Reeseye!");
+        sprintf(start_date, "%d-%02d-%02d", dateTime1.Date.Year, dateTime1.Date.Month, dateTime1.Date.Day);
+        sprintf(end_date, "%d-%02d-%02d", dateTime2.Date.Year, dateTime2.Date.Month, dateTime2.Date.Day);
+        sprintf(path, "/api/games/rapports?start_date=%s&end_date=%s", start_date, end_date);
 
-//             TP_ScrGotoxyEx(2, 63 - 7);
-//             TP_LcdPrintf("Wi=OK!");
-//             key = waitforKey();
-//             if (key == TP_KEY_OK)
-//                 continue;
-//             else
-//                 break;
-//         }
-//     }
+        read_from_file(ACCESS_TOKEN_FILE, &bufferToken);   
+        if (make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer) >= 0) {
+                LCD_Clear();
+                TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+                TP_ScrClsDisplayArea();
+                TP_ScrGotoxyEx(63 - 20, 31 - 7);
+                if (status_code >= 200 && status_code <= 299) {
+                    TP_LcdPrintf("Enprime...");
+                    if (print_rapport(buffer, start_date, end_date) == TRUE) {
+                        TP_LcdPrintf("Enprime!  ");
+                        waitforKey();
+                        // isRunning = FALSE;
+                        break;
+                    }
+                } else {
+                    // ere
+                    Handle404Error(status_code, buffer);
+                }
+        } else {
+            LCD_Clear();
+            TP_SetDisplayArea(2, 2, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
+            TP_ScrClsDisplayArea();
+            TP_ScrGotoxyEx(63 - 28, 31 - 7);
+            TP_LcdPrintf("Ere! Reeseye!");
 
-//     if (buffer != NULL)
-//     {
-//         TP_FreeMemory((void**)&buffer);
-//         buffer = NULL;
-//     }
+            TP_ScrGotoxyEx(2, 63 - 7);
+            TP_LcdPrintf("Wi=OK!");
+            key = waitforKey();
+            if (key == TP_KEY_OK)
+                continue;
+            else
+                break;
+        }
+    }
 
-//     if (bufferToken != NULL)
-//     {
-//         TP_FreeMemory((void**)&bufferToken);
-//         bufferToken = NULL;
-//     }
-//     return;
-// }
+    if (buffer != NULL)
+    {
+        TP_FreeMemory((void**)&buffer);
+        buffer = NULL;
+    }
 
-// // OK
-// void getTirages(void) {
-//     char *bufferToken = NULL, *buffer = NULL;
-// 	char start_date[30], path[43];
-//     uint16 status_code = 0;
-// 	cJSON *json = NULL;
-//     uint8 size = 0;
-//     char tir[32];
-//     TP_ListBoxRect listRect = {0};
-//     TP_DateTime dateTime;
-//     int32 ret = 0;
+    if (bufferToken != NULL)
+    {
+        TP_FreeMemory((void**)&bufferToken);
+        bufferToken = NULL;
+    }
+    return;
+}
 
-//     TP_DisplayInfo displayInfo =
-//     {
-//         "",
-//         ALIGN_LEFT,
-//         "",
-//         "",
-//         TP_KEY_OK,
-//         TP_KEY_CANCEL,
-//         TP_KEY_NONE,
-//         TP_KEY_NONE,
-//         ASCII
-//     };
 
-//     TP_ScrCls();
-//     TP_Kbflush();
-//     TP_ScrAttrSet(0);
-//     TP_ScrFontSet(ASCII);
-//     TP_ScrSpaceSet(0, 2);
 
-//     LCD_Clear();
-// 	memset(start_date, 0x00, sizeof(start_date));
-// 	memset(path, 0x00, sizeof(path));
-// 	memset(tir, 0x00, sizeof(tir));
+// OK
+void getTirages(void) {
+    char *bufferToken = NULL, *buffer = NULL;
+	char start_date[30], path[43];
+    uint16 status_code = 0;
+	cJSON *json = NULL;
+    uint8 size = 0;
+    char tir[32];
+    TP_ListBoxRect listRect = {0};
+    TP_DateTime dateTime;
+    int32 ret = 0;
+
+    TP_DisplayInfo displayInfo =
+    {
+        "",
+        ALIGN_LEFT,
+        "",
+        "",
+        TP_KEY_OK,
+        TP_KEY_CANCEL,
+        TP_KEY_NONE,
+        TP_KEY_NONE,
+        ASCII
+    };
+
+    TP_ScrCls();
+    TP_Kbflush();
+    TP_ScrAttrSet(0);
+    TP_ScrFontSet(ASCII);
+    TP_ScrSpaceSet(0, 2);
+
+    LCD_Clear();
+	memset(start_date, 0x00, sizeof(start_date));
+	memset(path, 0x00, sizeof(path));
+	memset(tir, 0x00, sizeof(tir));
     
-//     TP_GetDateTime(&dateTime);
+    TP_GetDateTime(&dateTime);
 
-// 	sprintf(path, "/api/games/list-tirage?date=%d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
+	sprintf(path, "/api/games/list-tirage?date=%d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
     
-//     // Get bufferToken
-//     read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
-//     if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
-//         if (status_code >= 200 && status_code <= 299) {
-//             json = cJSON_Parse(buffer);
-// 			if (json != NULL)
-// 			{
-//                 if (buffer != NULL) {
-//                     TP_FreeMemory((void**)&buffer);
-//                     buffer = NULL;
-//                 }
-// 				if (cJSON_IsArray(json))
-// 				{
-// 					cJSON *element;
-// 					cJSON_ArrayForEach(element, json) 
-// 					{
-// 						cJSON *list = cJSON_GetObjectItemCaseSensitive(element, "list");
+    // Get bufferToken
+    read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+    if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
+        if (status_code >= 200 && status_code <= 299) {
+            json = cJSON_Parse(buffer);
+			if (json != NULL)
+			{
+                if (buffer != NULL) {
+                    TP_FreeMemory((void**)&buffer);
+                    buffer = NULL;
+                }
+				if (cJSON_IsArray(json))
+				{
+					cJSON *element;
+					cJSON_ArrayForEach(element, json) 
+					{
+						cJSON *list = cJSON_GetObjectItemCaseSensitive(element, "list");
 
-// 						if (cJSON_IsArray(list)) 
-// 						{
-// 							cJSON *itemList;
-// 							cJSON_ArrayForEach(itemList, list) 
-// 							{
-// 								cJSON *name = cJSON_GetObjectItemCaseSensitive(itemList, "id");
-// 								cJSON *t1 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_1");
-// 								cJSON *t2 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_2");
-// 								cJSON *t3 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_3");
-//                                 // TP_DbgSerialPrn("\r\nTirage:%s\r\n", name->valuestring);
+						if (cJSON_IsArray(list)) 
+						{
+							cJSON *itemList;
+							cJSON_ArrayForEach(itemList, list) 
+							{
+								cJSON *name = cJSON_GetObjectItemCaseSensitive(itemList, "id");
+								cJSON *t1 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_1");
+								cJSON *t2 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_2");
+								cJSON *t3 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_3");
+                                // TP_DbgSerialPrn("\r\nTirage:%s\r\n", name->valuestring);
 
-//                                 sprintf(tir, "%s: %s-%s-%s\n", name->valuestring, t1->valuestring, t2->valuestring, t3->valuestring);  
+                                sprintf(tir, "%s: %s-%s-%s\n", name->valuestring, t1->valuestring, t2->valuestring, t3->valuestring);  
                                 
-//                                 concatString(&buffer, tir);              
-//                                 size++;
-// 							}
-// 						}
-// 					}
-// 				}
-//                 if (json != NULL) {
-// 				    cJSON_Delete(json);
-//                     json = NULL;
-//                 }
-// 			} else {
-//                 handleJSONNULL();
-//             }
-//         }
-//     } else {
-//        handleSocketError(ret);
-//     }
+                                concatString(&buffer, tir);              
+                                size++;
+							}
+						}
+					}
+				}
+                if (json != NULL) {
+				    cJSON_Delete(json);
+                    json = NULL;
+                }
+			} else {
+                handleJSONNULL();
+            }
+        }
+    } else {
+       handleSocketError(ret);
+    }
 
-//     LCD_Clear();
-//     sprintf(start_date, "Lo Ganyan / %d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
-//     Display_Header(start_date);
+    LCD_Clear();
+    sprintf(start_date, "Lo Ganyan / %d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
+    Display_Header(start_date);
     
-//     if (size > 0) {
-//         listRect.left = 2;
-//         listRect.top = 17;
-//         listRect.right = 125;
-//         listRect.bottom = 62;
-//         showText(&displayInfo, listRect, buffer, NULL, NULL, 0, NULL, NULL);
-//     } else {
-//         handleEmptyList();
-//     }
+    if (size > 0) {
+        listRect.left = 2;
+        listRect.top = 17;
+        listRect.right = 125;
+        listRect.bottom = 62;
+        showText(&displayInfo, listRect, buffer, NULL, NULL, 0, NULL, NULL);
+    } else {
+        handleEmptyList();
+    }
 
-//     if (buffer != NULL) {
-//         TP_FreeMemory((void**)&buffer);
-//         buffer = NULL;
-//     }
-//       if (bufferToken != NULL) {
-//         TP_FreeMemory((void**)&bufferToken);
-//         bufferToken = NULL;
-//     }
-//     return;
-// }
+    if (buffer != NULL) {
+        TP_FreeMemory((void**)&buffer);
+        buffer = NULL;
+    }
+      if (bufferToken != NULL) {
+        TP_FreeMemory((void**)&bufferToken);
+        bufferToken = NULL;
+    }
+    return;
+}
 
 
