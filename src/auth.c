@@ -106,7 +106,7 @@ Boolean postHandleLogin(void) {
     TP_Kbflush();
     TP_ScrAttrSet(0);
     TP_ScrFontSet(ASCII);
-    TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
 
     memset(json_string, 0x00, sizeof(json_string));
     memset(name, 0x00, sizeof(name));
@@ -120,6 +120,7 @@ Boolean postHandleLogin(void) {
         memset(password, 0x00, sizeof(password));
         LCD_Clear();
         Display_Header("Koneksyon");
+
         TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
         TP_ScrGotoxyEx(3, 15);
         TP_LcdPrintf("Itilizate: ");
@@ -130,14 +131,14 @@ Boolean postHandleLogin(void) {
         TP_ShowInputNum(0, 1, 1);
         key_ret = TP_GetHzString(name, 0, sizeof(name) - 1);
         if (key_ret == 0xFF) return;
-
+        TP_ScrSpaceSet(0, 2);
         TP_SetDisplayArea(1, MAX_SCREEN_HEIGHT - 16, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
-        TP_ScrGotoxyEx(3, MAX_SCREEN_HEIGHT - 16);
-        TP_LcdPrintf("SN: %s", imeiStr);
+        TP_ScrGotoxyEx(1, MAX_SCREEN_HEIGHT - 16);
+        TP_LcdPrintf("SN:%s", imeiStr);
 
         TP_ScrAttrSet(0);
         TP_ScrFontSet(ASCII);
-        TP_ScrSpaceSet(0, 2);
+        TP_ScrSpaceSet(1, 2);
         TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
         TP_ScrClsDisplayArea();
         TP_ScrGotoxyEx(3, 15);
@@ -174,10 +175,8 @@ Boolean postHandleLogin(void) {
                     TP_DbgSerialPrn("\r\nAUTH:%s %s %d %d\r\n", role->valuestring, imei->valuestring, strcmp(role->valuestring, "agent"), strcmp(imei->valuestring, (char*)imeiStr));
                     TP_DbgSerialPrn("\n%s\n", imeiStr);
                     // Check If agent and IMEI
-                    // if ((strcmp(role->valuestring, "agent") == 0 && strcmp(imei->valuestring, (char*)imeiStr) == 0))
-                    if (1 == 1)
-                    {
-                        
+                    if ((strcmp(role->valuestring, "agent") == 0 && strcmp(imei->valuestring, (char*)imeiStr) == 0))
+                    {   
                         success = TRUE;
                         write_to_file(ACCESS_TOKEN_FILE, accessToken->valuestring);
                         write_to_file(INFO_USER_FILE, buffer);
@@ -188,8 +187,10 @@ Boolean postHandleLogin(void) {
                         
                         if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, "/api/games/info-tirage", accessToken->valuestring, &status_code, &buffer)) >= 0)
                         {
-                            if (status_code >= 200 && status_code <= 299)
-                                write_to_file(INFO_TIRAGE_FILE, buffer);
+                            if (status_code >= 200 && status_code <= 299) {
+                                int32 ret = write_to_file(INFO_TIRAGE_FILE, buffer);
+                                TP_DbgSerialPrn("Tirages: %d", ret);
+                            }
                             
                         } else {
                             handleSocketError(ret);

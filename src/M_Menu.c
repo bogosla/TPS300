@@ -814,7 +814,9 @@ int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, 
     TP_BanIncomingCall(TRUE);
     TP_ScrFontSet(ASCII);
     TP_ScrAttrSet(0);
-    TP_ScrSpaceSet(0, 2);
+    // TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
+
     TP_ScrFontGet(&fontSizeFont);
     TP_StopRing();
 
@@ -951,7 +953,8 @@ int8 LCD_Menu_InfoTirage(const InfoTirage *menuItems, uint8 count, int8 select, 
     TP_BanIncomingCall(TRUE);
     TP_ScrFontSet(ASCII);
     TP_ScrAttrSet(0);
-    TP_ScrSpaceSet(0, 2);
+    // TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
     TP_ScrSpaceGet(&charSpace,&lineSpace);
     TP_ScrFontGet(&fontSizeFont);
     TP_StopRing();
@@ -1049,7 +1052,8 @@ int LCD_MenuTirage(const char *title, const Tirage *menuItems, unsigned int coun
 
     TP_ScrAttrSet(0);
     TP_ScrFontSet(ASCII);
-    TP_ScrSpaceSet(0, 2);
+    // TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
 
 	if (select < 0)
 		select = 0;
@@ -1133,6 +1137,7 @@ int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *
 	int32 id = 0, idToDelete = 0;
 		
     read_from_file(INFO_TIRAGE_FILE, &bufferTirages);
+    TP_DbgSerialPrn("Tirages DATA: %s", bufferTirages);
 	json = cJSON_Parse(bufferTirages);
 	
 	if (json != NULL)

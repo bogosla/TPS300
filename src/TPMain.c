@@ -25,15 +25,15 @@ const char SoftwareVersion[10] = {"V1.0\0"};
 
 
 const char menuItems[][MAX_CHAR_ITEMS] = {
-    "1.Kreye Fich",
-    "2.Cheche Fich",
-    "3.Jwenn Rapo",
-    "4.Lo Ganyan",
-    "5.Fich Ganyan",
-    "6.Pwofil",
-    "7.Konfigire Dat",
-    "8.Teste Enprimant",
-    "9.Dekonekte"
+    "1. Kreye Fich",
+    "2. Cheche Fich",
+    "3. Jwenn Rapo",
+    "4. Lo Ganyan",
+    "5. Fich Ganyan",
+    "6. Pwofil",
+    "7. Konfigire Dat",
+    "8. Teste Enprimant",
+    "9. Dekonekte"
 };
 
 uint8 count = sizeof(menuItems) / MAX_CHAR_ITEMS;
@@ -148,11 +148,11 @@ static void MgnAPP(void) {
     running = TRUE;
 
     while(running) {
-        // isLoggedIn = postHandleLogin();
-        // if (isLoggedIn == TRUE)
-        //     selected = 0;
-        // else
-        //     selected = -1;
+        isLoggedIn = postHandleLogin();
+        if (isLoggedIn == TRUE)
+            selected = 0;
+        else
+            selected = -1;
         
         while (selected >= 0) {
             selected = LCD_Menu("MGNLotto", menuItems, count, selected);
@@ -198,7 +198,7 @@ static void MgnAPP(void) {
 
 void TPMain(void)
 {
-    TP_DbgSerialPrnLevel(4);
+    TP_DbgSerialPrnLevel(5);
     TP_SetDefaultPortRate("115200");
     TP_FactoryMode_Register_GetSoftwareVersion_Function(TP_GetProductInfo);
     TP_SetBatteryLowWarningPic(MyBatteryLowWarningPic);
