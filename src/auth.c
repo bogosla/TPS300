@@ -2,7 +2,6 @@
 #include "TP_DemoDefine.h"
 
 
-
 // OK
 void getConfiguration(void) {
     char *bufferUser = NULL;
@@ -11,6 +10,7 @@ void getConfiguration(void) {
 	cJSON *tmp = NULL;
     char chtmp[64];
     char *todisplay = NULL;
+
     TP_ListBoxRect listRect = {2, 17, 125, 62};
 
     TP_DisplayInfo displayInfo =
@@ -34,7 +34,7 @@ void getConfiguration(void) {
     TP_Kbflush();
     TP_ScrAttrSet(0);
     TP_ScrFontSet(ASCII);
-    TP_ScrSpaceSet(0, 2);
+    TP_ScrSpaceSet(1, 2);
     Display_Header("Konfigirasyon");
     TP_GetModalIMEI(imei, 16);
     read_from_file(INFO_USER_FILE, &bufferUser);
@@ -65,8 +65,7 @@ void getConfiguration(void) {
 		sprintf(chtmp, "Dire siprsyon: %d\n", tmp->valueint);
         concatString(&todisplay, chtmp);
 
-
-        showText(&displayInfo, listRect, todisplay, NULL, NULL, 0, NULL, NULL);
+        showText(&displayInfo, listRect, todisplay, NULL, NULL, 0, NULL, NULL); // Display
     } else {
         handleJSONNULL();
     }
@@ -115,7 +114,6 @@ Boolean postHandleLogin(void) {
     TP_GetModalIMEI(imeiStr, 16);
     isRunning = TRUE;
     
-
     while (isRunning) {
         memset(password, 0x00, sizeof(password));
         LCD_Clear();
