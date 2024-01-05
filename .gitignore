@@ -3,15 +3,15 @@
 
 defs.sub
 tcc.sub
-images/*
+# images/*
 object/*
-upgrade/*
+# upgrade/*
 lnkfeedback.*
 app.sb0
 
 system.txt
 SIMCom_MultiUpgrade_Tool_v1.05
 SIMCom_MultiUpgrade_Tool_v1.05/*
-compile840W.py
+# compile840W.py
 tpbuild
 tplib
