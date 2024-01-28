@@ -8,7 +8,8 @@ object/*
 # upgrade/*
 lnkfeedback.*
 app.sb0
-
+images/flash
+flash
 system.txt
 SIMCom_MultiUpgrade_Tool_v1.05
 SIMCom_MultiUpgrade_Tool_v1.05/*

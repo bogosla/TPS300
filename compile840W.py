@@ -235,33 +235,33 @@ class GenTPS(object):
     # copy .\object\app .\image\app
     # By 
     # copy object\app images\APP\SIM840W64\
+    # GenerateUpgradeBin_V1.1.exe > nul
     def generate_bin(self):
         compile_command = [
             "copy", 
             os.path.join(self._object_dir, "APP"), 
             os.path.join(self._images_dir, os.path.join("APP", "SIM840W64"))
         ]
-        print(compile_command)
         result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-
-        # compile_command = [self._appgen, os.path.join(self._object_dir, "APP"), "32"]
-        # result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
         if result.returncode == 0:
             print(" ".join(compile_command))
         else:
             print(result.stderr)
 
-        # compile_command = ["copy", os.path.join(self._object_dir, "APP"), os.path.join(self._image_dir, "APP")]
-        # print(" ".join(compile_command))
+        compile_command = [
+            os.path.join(self._images_dir, os.path.join("APP", "SIM840W64", "GenerateUpgradeBin_V1.1")),
+            "."
+        ]
 
-        # result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=os.path.join(self._images_dir, os.path.join("APP", "SIM840W64")), check=True)
+        captured_output = result.stdout
+        print("Output:", captured_output)
         
-        # if result.returncode == 0:
-        #     print(" ".join(compile_command))
-        # else:
-        #     print(result.stderr)
+        if result.returncode == 0:
+            print(" ".join(compile_command))
+        else:
+            print(result.stderr)
 
 
     @classmethod
