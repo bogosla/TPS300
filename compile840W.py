@@ -53,6 +53,8 @@ class GenTPS(object):
         self._source_dir = os.path.join(self._current_dir, "src")
         self._object_dir = os.path.join(self._current_dir, "object")
         self._image_dir = os.path.join(self._current_dir, "image")
+        self._images_dir = os.path.join(self._current_dir, "images")
+
 
 
 
@@ -170,7 +172,7 @@ class GenTPS(object):
         str_app += "--symdefs " + self._object_dir + "\\app.sym\n"
         str_app += "--diag_suppress 6314\n"
         str_app +=  self._TPLIB_PATH + "\\tpcore\\images\\CORE\\SIM840W64\\SIM840W64_WINBOND_EMBEDDEDAT_PCB01_gprs_MT6252_S01.sym\n"
-        str_app += "--scatter " + "C:\\src\\tps300test0\\tpbuild\\build\\scatSIM840W64_APP.txt\n"
+        str_app += "--scatter " + self._images_dir + "\\APP\\SIM840W64\\scatSIM840W64_APP.txt\n"
         str_app += "--libpath " + self._LIBPATH + "\n"
 
         object_contents = os.listdir(self._object_dir)
@@ -224,26 +226,37 @@ class GenTPS(object):
         self.generate_app()
 
 
-        # self.generate_bin()
+        self.generate_bin()
 
         print("Finished generating.\n")
 
-
+    # Replace
     # appgen .\object\app 32
     # copy .\object\app .\image\app
+    # By 
+    # copy object\app images\APP\SIM840W64\
     def generate_bin(self):
-        compile_command = [self._appgen, os.path.join(self._object_dir, "APP"), "32"]
-        result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        compile_command = [
+            "copy", 
+            os.path.join(self._object_dir, "APP"), 
+            os.path.join(self._images_dir, os.path.join("APP", "SIM840W64"))
+        ]
+        print(compile_command)
+        result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+
+        # compile_command = [self._appgen, os.path.join(self._object_dir, "APP"), "32"]
+        # result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
         if result.returncode == 0:
             print(" ".join(compile_command))
         else:
             print(result.stderr)
 
-        compile_command = ["copy", os.path.join(self._object_dir, "APP"), os.path.join(self._image_dir, "APP")]
-        print(" ".join(compile_command))
+        # compile_command = ["copy", os.path.join(self._object_dir, "APP"), os.path.join(self._image_dir, "APP")]
+        # print(" ".join(compile_command))
 
-        result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        # result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         
         # if result.returncode == 0:
         #     print(" ".join(compile_command))
