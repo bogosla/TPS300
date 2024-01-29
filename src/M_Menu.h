@@ -32,6 +32,8 @@
 #include "TP_DisplayAPI.h"
 
 #include "endpoint.h"
+#include "bRequestsLib.h"
+
 
 // // --------------------------------------------------------------------------------------
 // // ---------------------------------------------------------------------------------------
@@ -79,7 +81,9 @@ int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *
 
 
 void postFiches(const char *buffBoules);
-int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage);
+// int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage);
+int make_post_fiches(const LinkedList *list, int id_tirage, const InfoTirage *tirages, int sizeTirage);
+
 
 void getFiches(void);
 void getWinningFiches(void);

@@ -129,6 +129,8 @@ Boolean postHandleLogin(void) {
         TP_ShowInputNum(0, 1, 1);
         key_ret = TP_GetHzString(name, 0, sizeof(name) - 1);
         if (key_ret == 0xFF) return;
+
+
         TP_ScrSpaceSet(0, 2);
         TP_SetDisplayArea(1, MAX_SCREEN_HEIGHT - 16, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
         TP_ScrGotoxyEx(1, MAX_SCREEN_HEIGHT - 16);
@@ -146,7 +148,6 @@ Boolean postHandleLogin(void) {
         TP_SetInputModePosition(110, 4);
         TP_SetInputModeControl(TP_KEY_OK, KEY_DEMO_CANCEL, KEY_DEMO_POUND);
         TP_ShowInputNum(0, 1, 1);
-
         key_ret = TP_GetPasswordTimed(password, 4, sizeof(password) - 1, 0x0001|0x0002|0x0003|0x0004|0x0400|0x1000, '*', 0);
         if (key_ret == 0xFF) return;
         
@@ -170,8 +171,8 @@ Boolean postHandleLogin(void) {
                     accessToken = cJSON_GetObjectItemCaseSensitive(json, "accessToken");
                     user = cJSON_GetObjectItemCaseSensitive(json, "user");
 					imei = cJSON_GetObjectItemCaseSensitive(user, "imei");
-                    TP_DbgSerialPrn("\r\nAUTH:%s %s %d %d\r\n", role->valuestring, imei->valuestring, strcmp(role->valuestring, "agent"), strcmp(imei->valuestring, (char*)imeiStr));
-                    TP_DbgSerialPrn("\n%s\n", imeiStr);
+                    
+
                     // Check If agent and IMEI
                     if ((strcmp(role->valuestring, "agent") == 0 && strcmp(imei->valuestring, (char*)imeiStr) == 0))
                     {   
@@ -188,6 +189,8 @@ Boolean postHandleLogin(void) {
                             if (status_code >= 200 && status_code <= 299) {
                                 int32 ret = write_to_file(INFO_TIRAGE_FILE, buffer);
                                 TP_DbgSerialPrn("Tirages: %d", ret);
+                            } else {
+                                TP_DbgSerialPrn("Tirages %s: %d", buffer, ret);
                             }
                             
                         } else {

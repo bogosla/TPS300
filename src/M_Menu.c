@@ -1,34 +1,194 @@
 #include "M_Menu.h"
 
 
-const unsigned char tlogo[] = 
-{
-    0x00,0x00,0x01,0x00,0x00,0x00,0x00,0xF0,0x00,0x00,0x00,
-    0x48,0x00,0x00,0x00,0x80,0x7F,0x00,0x00,0x08,0x46,
-    0x1F,0x4B,0x1E,0xD1,0x79,0xF9,0x51,0x12,0x78,0x60,
-    0xA4,0xC2,0x42,0xAA,0x1F,0x69,0x3F,0xE0,0x63,0x92,
-    0x9B,0x23,0x3C,0x0C,0x5D,0xD7,0x6A,0xD4,0x55,0x4D,
-    0x09,0xC1,0x45,0x22,0xB3,0x8A,0x69,0xB5,0x03,0x77,
-    0xC4,0x64,0x2D,0xC9,0x94,0x1D,0xFA,0x17,0xF5,0xE0,
-    0xB2,0xC6,0x75,0xCC,0xCB,0xC3,0x4C,0x88,0x1A,0x64,
-    0xBF,0x55,0xBE,0x7C,0x25,0x0F,0x77,0x88,0x26,0x73,
-    0x08,0x2B,0x6F,0xEC,0xA5,0x20,0x2E,0x9D,0x52,0x8D,
-    0xD2,0xA5,0xEC,0x4F,0xD8,0xAC,0xD2,0xE7,0x54,0x4D,
-    0x3F,0x51,0x57,0xD8,0x43,0x6C,0xDB,0x77,0xD2,0x88,
-    0x0E,0xC5,0xD5,0x10,0x76,0x3A,0xE4,0x7F,0x21,0x9A,
-    0x45,0x87,0xBD,0xFB,0x25,0xDE,0x7E,0xB1,0x5D,0xC1,
-    0x0A,0x13,0xC1,0x3B,0x10,0xE0,0xEC,0x12,0x0C,0x11,
-    0x23,0xCE,0x41,0x2F,0x75,0xEE,0x01,0x7B,0xED,0x38,
-    0x0B,0xE3,0xAF,0x1D,0x69,0xDA,0x43,0xAC,0x92,0x6C,
-    0x8E,0x71,0xAC,0x4C,0x8A,0x46,0x71,0x8C,0x7D,0xB0,
-    0x6E,0xF2,0x72,0x62,0x01,0x7D,0xF5,0x8B,0x67,0x9D,
-    0x16,0x86,0xB7,0xB1,0x13,0x35,0x1A,0x93,0x78,0xF0,
-    0xBF,0xDB,0x06,0x95,0x6B,0x61,0x0E,0x83,0x72,0x5D,
-    0xD0,0xBC,0x0F,0x2F,0x47,0x69,0x7B,0xAC,0x5F,0x22,
-    0x71,0xDB,0x30,0x23,0x6E,0x05,0xCD,0x27,0xB3,0xA7,
-    0xC0,0x1C,0xFE,0x07,0x3C,0x32,0x6F,0x70,0xFF,0x02,
 
-};
+void freeMyData(void *data) {
+    TP_FreeMemory((void**)&data);
+}
+
+
+int GetElement(LinkedList *list, const BouleItem *item) {
+    Node *current = list->head;
+
+    while (current != NULL) {
+        BouleItem *r = (BouleItem*)(current->data);
+        if (strcmp("L4", item->lotto) == 0 || strcmp("L5", item->lotto) == 0) {
+            if (strcmp(r->boul, item->boul) == 0 && strcmp(r->lotto, item->lotto) == 0 && strcmp(r->option, item->option) == 0)
+                return 0;
+        } else {
+            if (strcmp(r->boul, item->boul) == 0 && strcmp(r->lotto, item->lotto) == 0)
+                return 0;
+        }
+        current = current->next;
+    }
+    return -1;
+}
+
+void AddElem(LinkedList* list, BouleItem *element) 
+{
+    int s = GetElement(list, element);
+    TP_DbgSerialPrn("Add Elem: %s:%s: %d\n", element->boul, element->lotto, s);
+    
+    if (s == 0)
+    {
+        freeMyData(element);
+        return;
+    } else
+    {
+       Push(list, element);
+    }
+}
+
+
+static int getRevers(int boul)
+{
+	int r = 0;
+	int _boul = boul;
+	while (_boul > 0)
+	{
+		r = r*10 + _boul % 10;
+		_boul /= 10;
+	}
+	return r;
+}
+
+void addBoulePaire(LinkedList *list, char *pri)
+{
+	int i = 0;
+	while (i < 10)
+	{
+        BouleItem *item = NULL;
+        TP_AllocMemory(sizeof(BouleItem), (void**)&item);
+        if (item != NULL) {
+            item->id = 1;
+            sprintf(item->boul, "%d%d", i, i);
+            sprintf(item->pri, "%s", pri);
+            sprintf(item->option, "%s", "1");
+
+            setOptionBouleItem(item);
+            AddElem(list, item);
+        }
+		i++;
+	}
+    return;
+}
+
+
+void addBouleTriple(LinkedList *list, char *pri)
+{
+	int i = 0;
+	while (i < 10)
+	{
+		BouleItem *item = NULL;
+        TP_AllocMemory(sizeof(BouleItem), (void**)&item);
+        if (item != NULL) {
+            item->id = 1;
+            sprintf(item->boul, "%d%d%d", i, i, i);
+            sprintf(item->pri, "%s", pri);
+            sprintf(item->option, "%s", "1");
+
+            setOptionBouleItem(item);
+            AddElem(list, item);
+        }
+		i++;
+	}
+    return;
+}
+
+void addBouleRevers(LinkedList *list, char *pri) {
+    Node *current = list->head;
+
+    while (current != NULL) {
+        BouleItem *item = ((BouleItem*)current->data);
+        TP_DbgSerialPrn("Revers: %s\n", item->boul);
+
+        if (strcmp(item->lotto, "BO") == 0) {
+            int r = getRevers(atoi(item->boul));
+            
+            BouleItem *nitem = NULL;
+            TP_AllocMemory(sizeof(BouleItem), (void**)&nitem);
+            if (nitem != NULL) {
+                nitem->id = 1;
+                sprintf(nitem->boul, "%02d", r);
+                sprintf(nitem->option, "%s", "1");
+                sprintf(nitem->pri, "%s", pri);
+
+                setOptionBouleItem(nitem);
+                AddElem(list, nitem);
+            }
+        }
+        current = current->next;
+    }
+}
+
+
+void addBouleL4(LinkedList *list, char *pri, const char* tip) {
+    Node *current = list->head;
+
+    while (current != NULL) {
+        BouleItem *item = ((BouleItem*)current->data);
+        Node *current2 = current->next;
+        // if (current->next->next == NULL) return;
+        while (current2 != NULL) {
+            BouleItem *item2 = ((BouleItem*)current2->data);
+            // Only add number of two digits
+            TP_DbgSerialPrn("Boule L4: %s:%s\n", item->boul, item2->boul);
+
+			if (strcmp(item->lotto, "BO") == 0 && strcmp(item2->lotto, "BO") == 0)
+			{
+				BouleItem *nitem = NULL;
+                TP_AllocMemory(sizeof(BouleItem), (void**)&nitem);
+                if (item != NULL) {
+                    item->id = 1;
+                    sprintf(nitem->boul, "%s%s", item->boul, item2->boul);
+                    sprintf(nitem->pri, "%s", pri);
+                    sprintf(nitem->lotto, "%s", tip);
+                    sprintf(nitem->option, "%s", "1");
+                    setOptionBouleItem(nitem);
+                    AddElem(list, nitem);
+                }
+
+                if (strcmp(tip, "L4") == 0) {
+                    BouleItem *nitem2 = NULL;
+                    TP_AllocMemory(sizeof(BouleItem), (void**)&nitem2);
+                    if (item != NULL) {
+                        item->id = 1;
+                        sprintf(nitem2->boul, "%s%s", item2->boul, item->boul);
+                        sprintf(nitem2->pri, "%s", pri);
+                        sprintf(nitem2->lotto, "%s", tip);
+                        sprintf(nitem2->option, "%s", "1");
+                        setOptionBouleItem(nitem2);
+                        AddElem(list, nitem2);
+                    }
+                }
+			}
+            current2 = current2->next;
+        }
+        current = current->next;
+    }
+	return;
+}
+
+
+void addPwent(LinkedList *list, char *pri, unsigned int pwent) {
+	int i = 0;
+	while (i < 10)
+	{
+		BouleItem *item = NULL;
+        TP_AllocMemory(sizeof(BouleItem), (void**)&item);
+        if (item != NULL) {
+            item->id = 1;
+            sprintf(item->boul, "%d%d", i, pwent);
+            sprintf(item->pri, "%s", pri);
+            sprintf(item->option, "%s", "1");
+            setOptionBouleItem(item);
+            AddElem(list, item);
+        }
+		i++;
+	}
+    return;
+}
+
 
 
 const char menu[][MAX_CHAR_ITEMS] = {
@@ -801,22 +961,25 @@ int8 waitforKeyMs(int32 ms)
 }
 
 
-int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, int *s, InfoTirage *tirages, int sizeTirage) {
+
+
+static int GridTirageMenu(const LinkedList *menuItems, int select, int *s) {
     uint8 fontSizeFont = 0;
     uint8 running = TRUE;
     int8 istart, i, key = 0, to_ret;
-    int myi = 0, total = 0;
+    int myi = 0, total = 0, count = 0;
     const uint8 MAX_LINES = 5;
     TP_DateTime dateTime;
+    Node *current = NULL;
+    BouleItem *item = NULL;
+
 
     TP_ScrCls();
     TP_Kbflush();
     TP_BanIncomingCall(TRUE);
     TP_ScrFontSet(ASCII);
     TP_ScrAttrSet(0);
-    // TP_ScrSpaceSet(0, 2);
     TP_ScrSpaceSet(1, 2);
-
     TP_ScrFontGet(&fontSizeFont);
     TP_StopRing();
 
@@ -826,7 +989,7 @@ int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, 
         TP_SetDisplayArea(1, 1, MAX_SCREEN_WIDTH - 1, 12);
         TP_ScrDrawRect(2, 1, 126, 11);
         TP_ScrGotoxyEx(4, 3);
-        TP_LcdPrintf("%-5s => %6s", "Boul", "Pri");
+        TP_LcdPrintf("%-6s => %3s", "Boul", "Pri");
         TP_SetDisplayArea(2, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
         TP_ScrClsDisplayArea();
         TP_LcdFreeze();
@@ -835,25 +998,37 @@ int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, 
 		istart = (select / MAX_LINES) *  MAX_LINES; 
         myi = 0;
         total = 0;
-        while(myi < count)
-        {
-            total += atoi(menuItems[myi].pri);
-            myi++;
+    
+        current = menuItems->head;
+        while (current != NULL) {
+            TP_DbgSerialPrn("Cal TOTAL");
+
+            total += atoi(((BouleItem*)current->data)->pri);
+            current = current->next;
         }
 
         for (i = 0;  i < MAX_LINES; i++)
         {
+            count = Length(menuItems);
             if (istart + i < count)
             {
                 TP_ScrGotoxyEx(3, current_y);
+                item = (BouleItem*)Get(menuItems, istart + i);
                 if (istart + i == select)
                 {
                     TP_ScrAttrSet(1);
-                    TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);
+                    if ((strcmp(item->lotto, "L4") == 0) || (strcmp(item->lotto, "L5") == 0) ) 
+                        TP_LcdPrintf("%s:%s => %3d => %s", item->boul, item->option, atoi(item->pri), item->lotto);
+                    else
+                        TP_LcdPrintf("%-6s=> %3d => %s", item->boul, atoi(item->pri), item->lotto);	
+
                     TP_ScrAttrSet(0);
                 }
                 else
-                    TP_LcdPrintf("%-5s => %6d => %s", menuItems[istart + i].boul, atoi(menuItems[istart + i].pri), menuItems[istart + i].lotto);	
+                    if ((strcmp(item->lotto, "L4") == 0) || (strcmp(item->lotto, "L5") == 0)) 
+                        TP_LcdPrintf("%s:%s => %3d => %s", item->boul, item->option, atoi(item->pri), item->lotto);
+                    else
+                        TP_LcdPrintf("%-6s=> %3d => %s", item->boul, atoi(item->pri), item->lotto);	
                 current_y += 8;				
             }
             else
@@ -867,12 +1042,10 @@ int GridTirageMenu(const BouleItem menuItems[], unsigned int count, int select, 
 		TP_ScrUpdate();
 LOOP:
         key = waitforKeyMs(1000);
-        TP_DbgSerialPrn("\r\nKEY:%d\r\n", key);
-        
+
         switch(key)
         {
             case TIMEOUT_KEY:
-                // TP_DbgSerialPrn("\rTimeout happen\r\n");
                 break;
             case TP_KEY_UP:
                 select--;
@@ -909,6 +1082,7 @@ LOOP:
 
     return to_ret;
 }
+
 
 
 static int deleteInfoTirageByIndex(InfoTirage* list, int index, int size) 
@@ -1202,10 +1376,8 @@ int getLottoType(InfoTirage **selectedTirage, int *sizeTirage, char *name, int *
 }
 
 
-
 // OK
 void postFiches(const char *buffBoules) {
-
     cJSON *json = NULL;
     char name[96], boul[6], pri[7], option[2] = "1", pwent[2];
 	int id = 0, tip = 0;
@@ -1217,6 +1389,9 @@ void postFiches(const char *buffBoules) {
     uint8 key_ret, sWiNon = 1;
 
     Boolean fromRePost = FALSE;
+
+    LinkedList *array = Array();
+    int totest = 0;
 
     const char menu[][MAX_CHAR_ITEMS] = {
 		"1. Enprime",
@@ -1230,7 +1405,6 @@ void postFiches(const char *buffBoules) {
 
     Boolean isMA = FALSE;
     Boolean isOK = FALSE;
-    BouleItem newItem = {0, "", "", "", "1"};
 
 	memset(name, 0x00, sizeof(name));
 	memset(pwent, 0x00, sizeof(pwent));
@@ -1240,7 +1414,6 @@ void postFiches(const char *buffBoules) {
     selected = 0;
 
     tip = getLottoType(&tirages, &sizeTirage, name, &id);
-    TP_DbgSerialPrn("\r\nTIP=%d\r\n", tip);
 
     list = createList();
 	memset(pri, 0x00, sizeof(pri));
@@ -1251,6 +1424,7 @@ void postFiches(const char *buffBoules) {
     else 
         if (sizeTirage == 0)
             addItem(&tirages, &sizeTirage, id, name);
+
 
     if (buffBoules != NULL)
 	{
@@ -1268,15 +1442,22 @@ void postFiches(const char *buffBoules) {
 					cJSON *boule = cJSON_GetObjectItemCaseSensitive(element, "boule");
 					cJSON *montant = cJSON_GetObjectItemCaseSensitive(element, "montant");
 					cJSON *option = cJSON_GetObjectItemCaseSensitive(element, "option");
-					BouleItem _new = {0,"", "", "", ""};
-					sprintf(&_new.pri, "%.2f", montant->valuedouble);
-					strcpy(&_new.boul, boule->valuestring);
-					strcpy(&_new.lotto, lotto->valuestring);
-					strcpy(&_new.option, option->valuestring);
+					
                     if (strcmp(lotto->valuestring, "MA") == 0 && (uint32)(montant->valuedouble) == 0)
                         "// do nothing";
-                    else
-                        addElement(list, _new); // add boule in list boules
+                    else {
+                        BouleItem *_new = NULL;
+                        TP_AllocMemory(sizeof(BouleItem), (void**)&_new);
+                        if (_new != NULL) {
+                            sprintf(_new->pri, "%.2f", montant->valuedouble);
+                            strcpy(_new->boul, boule->valuestring);
+                            strcpy(_new->lotto, lotto->valuestring);
+                            strcpy(_new->option, option->valuestring);
+                            AddElem(array, _new);
+                        }
+                        
+                        // addElement(list, _new); // add boule in list boules
+                    }
 				}
 			}
 		}
@@ -1287,11 +1468,10 @@ void postFiches(const char *buffBoules) {
         }
 	}
 
-
 	while (selected >= 0)
 	{
-		selected = GridTirageMenu(list->items, list->size, selected, &sselected, tirages, sizeTirage);
-        TP_DbgSerialPrn("\r\nGRID TIRAGE KEY RET=%d\r\n", selected);
+        BouleItem *newItem = NULL;
+		selected = GridTirageMenu(array, selected, &sselected);
 		switch(selected) 
 		{
             case 10:
@@ -1303,33 +1483,42 @@ void postFiches(const char *buffBoules) {
                 Display_Header("Mete Boul");
                 TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
 
-                TP_ScrGotoxyEx(3, 15);
+                TP_ScrGotoxyEx(3, 14);
                 TP_LcdPrintf("Boul:");
                 TP_SetDisplayArea(6, 23, MAX_SCREEN_WIDTH - 1, 31);
 
                 TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
                 TP_ShowInputNum(0, 0, 0);
                 TP_SetInputMode(INPUTMODE_LOWCASE);
+
                 key_ret = TP_GetString((char*)boul, 0x80|0x04|0x10, 2, 5);
                 if (key_ret == 0xFF) 
                     break;
-                TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
 
-                TP_ScrGotoxyEx(3, 32);
+                TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+                TP_ScrGotoxyEx(3, 31);
                 TP_LcdPrintf("Pri: ");
                 TP_SetDisplayArea(27, 32, MAX_SCREEN_WIDTH - 1, 49);
                 TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
                 TP_ShowInputNum(0, 0, 0);
                 TP_SetInputMode(INPUTMODE_MAX);
+
                 key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                 if (key_ret == 0xFF) 
                     break;
+  
+                TP_AllocMemory(sizeof(BouleItem), (void**)&newItem);
 
-                sprintf(&newItem.boul, "%s", boul);
-				sprintf(&newItem.pri, "%s", pri);
-                setOptionBouleItem(&newItem);
+                if (newItem != NULL){
+                    newItem->id = 1;
+                    strcpy(newItem->boul, boul);
+                    strcpy(newItem->pri, pri);
+                    strcpy(newItem->option, "1");
+                }
 
-				if (strlen(newItem.boul) == 4 && isOK == TRUE)
+                setOptionBouleItem(newItem);
+
+				if (strlen(newItem->boul) == 4 && isOK == TRUE)
 				{
                     uint8 kkey = 0, sop = 1;
                     TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, MAX_SCREEN_HEIGHT - 1);
@@ -1338,7 +1527,7 @@ void postFiches(const char *buffBoules) {
                     TP_SetDisplayArea(1, 14, MAX_SCREEN_WIDTH - 1, 22);
                     TP_ScrGotoxyEx(3, 15);
 
-                    TP_LcdPrintf("%s X %s", newItem.boul, newItem.pri);
+                    TP_LcdPrintf("%s X %s", newItem->boul, newItem->pri);
 
                     running = TRUE;
                     while (running)
@@ -1357,8 +1546,6 @@ void postFiches(const char *buffBoules) {
                             TP_LcdPrintf("WI");
                         }
                         TP_ScrAttrSet(0);
-
-
                         TP_ScrGotoxyEx(57, 27);
                          if (sWiNon == 2) {
                             TP_ScrAttrSet(1);
@@ -1383,12 +1570,12 @@ void postFiches(const char *buffBoules) {
                                 if (sWiNon == 1)
 								{
 									isMA = TRUE;
-									sprintf(&newItem.lotto, "%s", "MA");
+									sprintf(newItem->lotto, "%s", "MA");
 								}
 								else
 								{
 									isMA = FALSE;
-									sprintf(&newItem.lotto, "%s", "L4");
+									sprintf(newItem->lotto, "%s", "L4");
 								}
                                 isOK = TRUE;
                                 running = FALSE;
@@ -1404,32 +1591,33 @@ void postFiches(const char *buffBoules) {
                     }
                 }
 
-				if (strlen(newItem.boul) >= 4 && isOK == TRUE && isMA == FALSE) {
+				if (strlen(newItem->boul) >= 4 && isOK == TRUE && isMA == FALSE) {
                     do
                     {
-                        TP_SetDisplayArea(1, 31, MAX_SCREEN_WIDTH / 2, 40);
+                        TP_SetDisplayArea(1, 32, MAX_SCREEN_WIDTH / 2, 48);
                         TP_ScrClsDisplayArea();                        
 
-                        TP_ScrGotoxyEx(3, 32);
-                        TP_LcdPrintf("Opsyon? ");
-                        TP_SetDisplayArea(27, 31, MAX_SCREEN_WIDTH - 1, 49);
+                        TP_ScrGotoxyEx(3, 39);
+                        TP_LcdPrintf("Opsyon: ");
+                        TP_SetDisplayArea(48, 39, MAX_SCREEN_WIDTH - 1, 49);
                         TP_SetInputModeControl(TP_KEY_OK, TP_KEY_CANCEL, KEY_DEMO_POUND);
                         TP_ShowInputNum(0, 0, 0);
                         TP_SetInputMode(INPUTMODE_MAX);
+
                         key_ret = TP_GetString((char*)option, 0x80|0x04|0x10, 1, 1);
                         if (key_ret == 0xFF) {
                             break;
                             isOK = FALSE;
                         } else {
-                            sprintf(&newItem.option, option);
+                            sprintf(newItem->option, option);
                             isOK = TRUE;                
                         }
-                    } while (atoi(option) < 1 && atoi(option) >=3);
+                    } while (atoi(option) < 1 || atoi(option) > 3);
                 }
 
                 if (isOK == TRUE) {
-					addElement(list, newItem);
-					selected = list->size - 1;
+                    AddElem(array, newItem);
+                    selected = Length(array) - 1;
                 }
                 break;
             case 11:
@@ -1441,12 +1629,12 @@ void postFiches(const char *buffBoules) {
 					switch(selected2) 
 					{
                         case 0:
-                        if (make_post_fiches(list, id, tirages, sizeTirage) == 0)
+                        if (make_post_fiches(array, id, tirages, sizeTirage) == 0)
 							{
 								// canSelectBoulePaire = 1;
 								// canSelectBouleTriple = 1;
-								destroyList(list);
-								list = createList();
+								FreeArray(array, freeMyData);
+								array = Array();
 								selected2 = -1;
 								if (buffBoules != NULL)
 								{
@@ -1476,7 +1664,7 @@ void postFiches(const char *buffBoules) {
                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                             if (key_ret == 0xFF) 
                                 break;
-							addBoulePaire(list, pri);
+							addBoulePaire(array, pri);
                             selected2 = -1;
                             break;
                         case 2:
@@ -1494,7 +1682,7 @@ void postFiches(const char *buffBoules) {
                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                             if (key_ret == 0xFF) 
                                 break;
-							addBouleTriple(list, pri);
+							addBouleTriple(array, pri);
                             selected2 = -1;
                             break;
                         case 3:
@@ -1512,7 +1700,7 @@ void postFiches(const char *buffBoules) {
                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                             if (key_ret == 0xFF) 
                                 break;
-							addBouleRevers(list, pri);
+							addBouleRevers(array, pri);
                             selected2 = -1;
                             break;
                         case 4:
@@ -1530,7 +1718,7 @@ void postFiches(const char *buffBoules) {
                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                             if (key_ret == 0xFF) 
                                 break;
-							addBouleMarriage(list, pri);
+							addBouleL4(array, pri, "MA");
                             selected2 = -1;
                             break;
                         case 5:
@@ -1548,7 +1736,8 @@ void postFiches(const char *buffBoules) {
                             key_ret = TP_GetString((char*)pri, 0x80|0x04|0x10, 1, 7);
                             if (key_ret == 0xFF) 
                                 break;
-							addBouleL4(list, pri);
+							addBouleL4(array, pri, "L4");
+                            selected2 = -1;
                             break;
                         case 6:
                             LCD_Clear();
@@ -1578,7 +1767,7 @@ void postFiches(const char *buffBoules) {
                             if (key_ret == 0xFF) 
                                 break;
 
-							addPwent(list, pri, atoi(pwent));
+							addPwent(array, pri, atoi(pwent));
                             selected2 = -1;
                             break;
                         default:
@@ -1587,15 +1776,17 @@ void postFiches(const char *buffBoules) {
                 }
                 break;
             case 12:
-                deleteByIndex(list, sselected);
-				selected = list->size;
+                FreeItem(array, Get(array, sselected), freeMyData);
+				selected = Length(array);
                 break;
             default:
                 break;
         }
     }
+    
     // Free Stuff
-    destroyList(list);
+    FreeArray(array, freeMyData);
+    // destroyList(list);
     freeItems(tirages, sizeTirage);
 	sizeTirage = 0;
     return;
@@ -1919,7 +2110,7 @@ void getFiches(void)
 
 
 // OK
-int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int sizeTirage)
+int make_post_fiches(const LinkedList *list, int id_tirage, const InfoTirage *tirages, int sizeTirage)
 {
 	uint16 status_code = 0;
 	char *buffer = NULL;
@@ -1931,24 +2122,26 @@ int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int s
 	int state = 0, i = 0, x = 0;
     int32 ret = 0;
 
+    Node *current = NULL;
 	read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
 
 	root = cJSON_CreateObject();
 	arrayBoul = cJSON_CreateArray();
 	ficheData = cJSON_CreateArray();
-	
+    
+    current = list->head;
 	i = 0;
-	while (i < list->size)
-	{
-		cJSON *tirage = cJSON_CreateObject();
-		cJSON_AddStringToObject(tirage, "boule", list->items[i].boul);
-		cJSON_AddStringToObject(tirage, "option", list->items[i].option);
-		cJSON_AddStringToObject(tirage, "lotto", list->items[i].lotto);
-		cJSON_AddNumberToObject(tirage, "montant", atoi(list->items[i].pri));
+    while (current != NULL) {
+        cJSON *tirage = cJSON_CreateObject();
+		cJSON_AddStringToObject(tirage, "boule", ((BouleItem*)current->data)->boul);
+		cJSON_AddStringToObject(tirage, "option", ((BouleItem*)current->data)->option);
+		cJSON_AddStringToObject(tirage, "lotto", ((BouleItem*)current->data)->lotto);
+		cJSON_AddNumberToObject(tirage, "montant", atoi(((BouleItem*)current->data)->pri));
 		cJSON_AddNumberToObject(tirage, "id", i + 1);
 		cJSON_AddItemToArray(arrayBoul, tirage);
+        current = current->next;
 		i++;
-	}
+    }
 
 	if (sizeTirage == 0)
 	{
@@ -1962,8 +2155,6 @@ int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int s
 			cJSON *tir = cJSON_CreateObject();
 			cJSON_AddNumberToObject(tir, "tirage", tirages[x].id);
             cJSON_AddItemReferenceToObject(tir, "bouleLists", arrayBoul);
-
-			// cJSON_AddItemToObject(tir, "bouleLists", arrayBoul);
 			cJSON_AddItemToArray(ficheData, tir);
 			x++;
 		}
@@ -1972,10 +2163,11 @@ int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int s
 	}
 	
 	jsonStr = cJSON_Print(root);
+    TP_DbgSerialPrn("JSON TO SEND: %s\n", jsonStr);
 
 	if (sizeTirage == 0)
 	{
-		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
+		if ((ret = bmake_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
 		{
 			handleSocketError(ret);
 			state = -1;
@@ -1993,7 +2185,7 @@ int make_post_fiches(const List *list, int id_tirage, InfoTirage *tirages, int s
 		}
 	} else 
 	{
-		if ((ret = make_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/v2/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
+		if ((ret = bmake_http_POST(SUBDOMAIN_URL, BASE_URL, "/api/games/v2/fiche", jsonStr, bufferToken, &status_code, &buffer)) < 0)
 		{
 			handleSocketError(ret);
 			state = -1;

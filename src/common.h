@@ -79,14 +79,6 @@ Boolean print_fiche(const char *buffer, int hasMultiple);
 Boolean reprint_fiche(const Tirage tirage);
 Boolean print_winnings_fiche(const cJSON *data, int size, const char *start_date, const char *end_date);
 
-void addBoulePaire(List *list, char *pri);
-void addBouleTriple(List *list, char *pri);
-void addBouleRevers(List *list, char *pri);
-void addBouleMarriage(List *list, char *pri);
-void addBouleL4(List *list, char *pri);
-void addPwent(List *list, char *pri, unsigned int pwent);
-
-
 Boolean yesNoModal(const char *title);
 
 void freeTirageItems(Tirage* array, int size);
