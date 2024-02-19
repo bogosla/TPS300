@@ -90,6 +90,7 @@ void getConfiguration(void) {
 
 
 Boolean postHandleLogin(void) {
+
     Boolean isRunning = TRUE;
     uint8 key, key_ret;
     cJSON *json = NULL, *imei = NULL, *role = NULL, *accessToken = NULL, *user = NULL;
@@ -110,6 +111,7 @@ Boolean postHandleLogin(void) {
     memset(json_string, 0x00, sizeof(json_string));
     memset(name, 0x00, sizeof(name));
     memset(imeiStr, 0x00, sizeof(imeiStr));
+    
 
     TP_GetModalIMEI(imeiStr, 16);
     isRunning = TRUE;

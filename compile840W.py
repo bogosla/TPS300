@@ -158,7 +158,7 @@ class GenTPS(object):
         str_app = ""
         
         str_app += self._TPLIB_PATH + "\\tpcore\lib\core.lib\n"
-        str_app += self._TPLIB_PATH + "\\tpcore\lib\\TPS300_EN.lib\n"
+        str_app += self._TPLIB_PATH + "\\tpcore\lib\\TPS302_EN.lib\n"
         str_app += self._TPLIB_PATH + "\\tpcore\lib\\tpcharset_west.lib\n"
         str_app += "--cpu " + self._CPU + "\n"
         str_app += "--map\n"

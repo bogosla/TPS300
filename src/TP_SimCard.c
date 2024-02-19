@@ -551,7 +551,7 @@ void ShowSimCardStartUPProcess()
     uint8 SimCardStatue;
     ///Check SimCard Statue
     TP_MobileCardSetActiveCardSlot(0);
-
+    TP_DbgSerialPrn("Active SIM: %d", TP_MobileCardGetActiveCardSlot());
 
     SimCardStatue = TP_GetMobileCardStatus();
 

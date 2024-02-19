@@ -125,7 +125,6 @@ static void MgnAPP(void) {
         __DATE__,
         __TIME__
     );
-
     TP_DbgSerialPrn("SIM Slot: %d\n", TP_MobileCardGetActiveCardSlot());
 
     TP_SetCurrentCharSet(CHARSET_ASCII);
@@ -137,6 +136,10 @@ static void MgnAPP(void) {
     TP_PrnInit();
 
     ShowSimCardStartUPProcess();
+
+    // #ifdef DUAL_SIM_CHECK
+    //     SwitchCardTest();
+    // #endif
 
 
     while (TP_TimerCheck(1) != 0);
@@ -198,7 +201,7 @@ static void MgnAPP(void) {
 
 void TPMain(void)
 {
-    TP_DbgSerialPrnLevel(5);
+    TP_DbgSerialPrnLevel(3);
     TP_SetDefaultPortRate("115200");
     TP_FactoryMode_Register_GetSoftwareVersion_Function(TP_GetProductInfo);
     TP_SetBatteryLowWarningPic(MyBatteryLowWarningPic);

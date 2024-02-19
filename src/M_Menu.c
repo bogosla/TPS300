@@ -1,7 +1,5 @@
 #include "M_Menu.h"
 
-
-
 void freeMyData(void *data) {
     TP_FreeMemory((void**)&data);
 }
@@ -23,6 +21,7 @@ int GetElement(LinkedList *list, const BouleItem *item) {
     }
     return -1;
 }
+
 
 void AddElem(LinkedList* list, BouleItem *element) 
 {
@@ -51,6 +50,7 @@ static int getRevers(int boul)
 	}
 	return r;
 }
+
 
 void addBoulePaire(LinkedList *list, char *pri)
 {
@@ -94,6 +94,7 @@ void addBouleTriple(LinkedList *list, char *pri)
 	}
     return;
 }
+
 
 void addBouleRevers(LinkedList *list, char *pri) {
     Node *current = list->head;
