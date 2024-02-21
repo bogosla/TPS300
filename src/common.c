@@ -148,6 +148,7 @@ Boolean print_rapport(const char *buffer, const char *start_date, const char *en
         if (json2 != NULL) {
             TP_PrnInit();
             TP_PrnSessionStart();
+            TP_PrnLogo(logo_print, 384, 128);
             TP_PrnClearString();
             TP_ScrSetIcon(ICON_PRINTER, OPENICON);
 
@@ -260,6 +261,8 @@ Boolean print_fiche(const char *buffer, int hasMultiple) {
         read_from_file(INFO_USER_FILE, &userData);
         TP_PrnInit();
         TP_PrnSessionStart();
+        TP_PrnLogo(logo_print, 384, 128);
+        
         TP_PrnClearString();
         TP_ScrSetIcon(ICON_PRINTER, OPENICON);
 
@@ -428,6 +431,8 @@ Boolean reprint_fiche(const Tirage tirage)
     if (json != NULL && bouleList != NULL) {
         TP_PrnInit();
         TP_PrnSessionStart();
+        TP_PrnLogo(logo_print, 384, 128);
+
         TP_ScrSetIcon(ICON_PRINTER, OPENICON);
         TP_PrnSpaceSet(0, 0);
         TP_PrnHighlightSet(FALSE);
@@ -563,6 +568,8 @@ Boolean print_winnings_fiche(const cJSON *data, int size, const char *start_date
 
     TP_PrnInit();
     TP_PrnSessionStart();
+    TP_PrnLogo(logo_print, 384, 128);
+
     TP_PrnClearString();
     TP_ScrSetIcon(ICON_PRINTER, OPENICON);
 

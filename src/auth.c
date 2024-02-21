@@ -453,6 +453,8 @@ void getTirages(void) {
         }
 
         LCD_Clear();
+        TP_ScrFontSet(ASCII);
+        TP_ScrSpaceSet(0, 2);
         sprintf(start_date, "Lo Ganyan / %d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
         Display_Header(start_date);
         
