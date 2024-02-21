@@ -364,6 +364,7 @@ void getTirages(void) {
     TP_ListBoxRect listRect = {0};
     TP_DateTime dateTime;
     int32 ret = 0;
+    Boolean isRunning = FALSE, result = FALSE;
 
     TP_DisplayInfo displayInfo =
     {
@@ -384,85 +385,95 @@ void getTirages(void) {
     TP_ScrFontSet(ASCII);
     TP_ScrSpaceSet(0, 2);
 
-    LCD_Clear();
-	memset(start_date, 0x00, sizeof(start_date));
-	memset(path, 0x00, sizeof(path));
-	memset(tir, 0x00, sizeof(tir));
-    
+    isRunning = TRUE;
+
     TP_GetDateTime(&dateTime);
+    memset(start_date, 0x00, sizeof(start_date));
+    while (isRunning) {
+        LCD_Clear();
+        displayInfo.strTitle = "Dat";
+        result = TP_DateInput(&displayInfo, &dateTime.Date);
+        if (result == FALSE)
+            return;
+        // LCD_Clear();
+        memset(path, 0x00, sizeof(path));
+        memset(tir, 0x00, sizeof(tir));
+        
+        // TP_GetDateTime(&dateTime);
 
-	sprintf(path, "/api/games/list-tirage?date=%d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
-    
-    // Get bufferToken
-    read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
-    if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
-        if (status_code >= 200 && status_code <= 299) {
-            json = cJSON_Parse(buffer);
-			if (json != NULL)
-			{
-                if (buffer != NULL) {
-                    TP_FreeMemory((void**)&buffer);
-                    buffer = NULL;
+        sprintf(path, "/api/games/list-tirage?date=%d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
+        
+        // Get bufferToken
+        read_from_file(ACCESS_TOKEN_FILE, &bufferToken);
+        if ((ret = make_http_GET(SUBDOMAIN_URL, BASE_URL, path, bufferToken, &status_code, &buffer)) >= 0) {
+            if (status_code >= 200 && status_code <= 299) {
+                json = cJSON_Parse(buffer);
+                if (json != NULL)
+                {
+                    if (buffer != NULL) {
+                        TP_FreeMemory((void**)&buffer);
+                        buffer = NULL;
+                    }
+                    if (cJSON_IsArray(json))
+                    {
+                        cJSON *element;
+                        cJSON_ArrayForEach(element, json) 
+                        {
+                            cJSON *list = cJSON_GetObjectItemCaseSensitive(element, "list");
+
+                            if (cJSON_IsArray(list)) 
+                            {
+                                cJSON *itemList;
+                                cJSON_ArrayForEach(itemList, list) 
+                                {
+                                    cJSON *name = cJSON_GetObjectItemCaseSensitive(itemList, "id");
+                                    cJSON *t1 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_1");
+                                    cJSON *t2 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_2");
+                                    cJSON *t3 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_3");
+                                    // TP_DbgSerialPrn("\r\nTirage:%s\r\n", name->valuestring);
+
+                                    sprintf(tir, "%s: %s-%s-%s\n", name->valuestring, t1->valuestring, t2->valuestring, t3->valuestring);  
+                                    
+                                    concatString(&buffer, tir);              
+                                    size++;
+                                }
+                            }
+                        }
+                    }
+                    if (json != NULL) {
+                        cJSON_Delete(json);
+                        json = NULL;
+                    }
+                } else {
+                    handleJSONNULL();
                 }
-				if (cJSON_IsArray(json))
-				{
-					cJSON *element;
-					cJSON_ArrayForEach(element, json) 
-					{
-						cJSON *list = cJSON_GetObjectItemCaseSensitive(element, "list");
-
-						if (cJSON_IsArray(list)) 
-						{
-							cJSON *itemList;
-							cJSON_ArrayForEach(itemList, list) 
-							{
-								cJSON *name = cJSON_GetObjectItemCaseSensitive(itemList, "id");
-								cJSON *t1 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_1");
-								cJSON *t2 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_2");
-								cJSON *t3 = cJSON_GetObjectItemCaseSensitive(itemList, "tirage_3");
-                                // TP_DbgSerialPrn("\r\nTirage:%s\r\n", name->valuestring);
-
-                                sprintf(tir, "%s: %s-%s-%s\n", name->valuestring, t1->valuestring, t2->valuestring, t3->valuestring);  
-                                
-                                concatString(&buffer, tir);              
-                                size++;
-							}
-						}
-					}
-				}
-                if (json != NULL) {
-				    cJSON_Delete(json);
-                    json = NULL;
-                }
-			} else {
-                handleJSONNULL();
             }
+        } else {
+        handleSocketError(ret);
         }
-    } else {
-       handleSocketError(ret);
-    }
 
-    LCD_Clear();
-    sprintf(start_date, "Lo Ganyan / %d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
-    Display_Header(start_date);
-    
-    if (size > 0) {
-        listRect.left = 2;
-        listRect.top = 17;
-        listRect.right = 125;
-        listRect.bottom = 62;
-        showText(&displayInfo, listRect, buffer, NULL, NULL, 0, NULL, NULL);
-    } else {
-        handleEmptyList();
-    }
+        LCD_Clear();
+        sprintf(start_date, "Lo Ganyan / %d-%02d-%02d", dateTime.Date.Year, dateTime.Date.Month, dateTime.Date.Day);
+        Display_Header(start_date);
+        
+        if (size > 0) {
+            listRect.left = 2;
+            listRect.top = 17;
+            listRect.right = 125;
+            listRect.bottom = 62;
+            showText(&displayInfo, listRect, buffer, NULL, NULL, 0, NULL, NULL);
+        } else {
+            handleEmptyList();
+        }
 
-    if (buffer != NULL) {
-        TP_FreeMemory((void**)&buffer);
-        buffer = NULL;
-    }
-      if (bufferToken != NULL) {
-        TP_FreeMemory((void**)&bufferToken);
-        bufferToken = NULL;
+        if (buffer != NULL) {
+            TP_FreeMemory((void**)&buffer);
+            buffer = NULL;
+        }
+        if (bufferToken != NULL) {
+            TP_FreeMemory((void**)&bufferToken);
+            bufferToken = NULL;
+        }
     }
     return;
 }

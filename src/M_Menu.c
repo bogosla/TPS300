@@ -963,7 +963,6 @@ int8 waitforKeyMs(int32 ms)
 
 
 
-
 static int GridTirageMenu(const LinkedList *menuItems, int select, int *s) {
     uint8 fontSizeFont = 0;
     uint8 running = TRUE;
@@ -1083,7 +1082,6 @@ LOOP:
 
     return to_ret;
 }
-
 
 
 static int deleteInfoTirageByIndex(InfoTirage* list, int index, int size) 

@@ -2054,10 +2054,10 @@ Boolean TP_DateInput( TP_DisplayInfo *displayInfo, TP_Date *pDate )
         }
     }
 
-    TP_ScrDrawRect( drawLeft_y-1 ,
-                    drawTop-1,
-                    drawRight_y+1,
-                    drawBottom+1);
+    TP_ScrDrawRect( drawLeft_y-(1+1) ,
+                    drawTop-(1+1),
+                    drawRight_y+(1+1),
+                    drawBottom+(1+1));
     DrawText(drawLeft_yc,
              drawTop,
              drawRight_yc,
@@ -2065,10 +2065,10 @@ Boolean TP_DateInput( TP_DisplayInfo *displayInfo, TP_Date *pDate )
              ALIGN_MIDDLE,
              strYear);
 
-    TP_ScrDrawRect( drawLeft_m-1 ,
-                    drawTop-1,
-                    drawRight_m+1,
-                    drawBottom+1);
+    TP_ScrDrawRect( drawLeft_m-(1+1) ,
+                    drawTop-(1+1),
+                    drawRight_m+(1+1),
+                    drawBottom+(1+1));
     DrawText(drawLeft_mc,
              drawTop,
              drawRight_mc,
@@ -2076,10 +2076,10 @@ Boolean TP_DateInput( TP_DisplayInfo *displayInfo, TP_Date *pDate )
              ALIGN_MIDDLE,
              strMonth);
 
-    TP_ScrDrawRect( drawLeft_d-1 ,
-                    drawTop-1,
-                    drawRight_d+1,
-                    drawBottom+1);
+    TP_ScrDrawRect( drawLeft_d-(1+1) ,
+                    drawTop-(1+1),
+                    drawRight_d+(1+1),
+                    drawBottom+(1+1));
     /*
     DrawText(drawLeft_sc,
              drawTop,
