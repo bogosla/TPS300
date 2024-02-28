@@ -1,7 +1,0 @@
-FlashParam 0x087D0000 0x00008000
-{
-    FlashParam 0x087D0000
-    {
-        * (+RO)
-    }
-}
